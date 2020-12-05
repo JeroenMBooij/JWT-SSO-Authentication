@@ -90,9 +90,12 @@ namespace AuthenticationServer.Logic.Managers
 
             return new TokenValidationParameters()
             {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = GetSymmetricSecurityKey(),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                IssuerSigningKey = GetSymmetricSecurityKey()
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(5)
             };
         }
     }
