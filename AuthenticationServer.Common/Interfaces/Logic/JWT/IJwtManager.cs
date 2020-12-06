@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace AuthenticationServer.Logic.Managers.Interfaces
+namespace AuthenticationServer.Common.Interfaces.Logic.JWT
 {
-    interface IAuthManager
+    public interface IJwtManager
     {
         string SecretKey { get; set; }
 
