@@ -1,17 +1,17 @@
-﻿using Dapper;
+﻿using AuthenticationServer.Common.Interfaces.Domain;
+using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
+using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using AuthenticationServer.Common.Interfaces.Domain;
 
 namespace AuthenticationServer.Domain.DataAccess.DataContext
 {
-    public class MainSqlDataAccess : ISqlDataAccess
+    public class MainSqlDataAccess : IMainSqlDataAccess
     {
         private readonly IConfiguration _config;
 
@@ -22,6 +22,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
         {
             _config = config;
         }
+
 
         public async Task<T> GetData<T, U>(string sql, U parameters)
         {
@@ -47,14 +48,35 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             }
         }
 
-        public async Task SaveData<T>(string sql, T parameters)
+        public async Task ExecuteStoredProcedures<T>(Dictionary<T, string> ParametersToStoredProcedure)
         {
             string connectionString = _config.GetConnectionString(Connectionstring);
 
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                await connection.ExecuteAsync(sql, parameters);
+                connection.Open();
+                using(var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach ((T parameters, string storedProcedureName) in ParametersToStoredProcedure)
+                            await connection.QueryAsync(storedProcedureName, parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+                        transaction.Commit();
+                    }
+                    catch(Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception($"saving your changes in the database failed: {ex.Message}");
+                    }
+                }
+                
             }
+        }
+
+        public Task SaveData<T>(string sql, T parameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

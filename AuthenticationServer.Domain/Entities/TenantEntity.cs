@@ -1,22 +1,48 @@
 ﻿using AuthenticationServer.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthenticationServer.Domain.Entities
 {
-    [Table("tenants")]
+    [Table("Tenants")]
     public class TenantEntity : AuditableData
     {
+        public TenantEntity()
+        {
+            Domains = new HashSet<DomainEntity>();
+            Languages = new HashSet<LanguageEntity>();
+        }
         [Key]
-        public int Id { get; set; }
-        [Required]
-        public string Name { get; set; }
+        public Guid Id { get; set; }
+
         [Required]
         public string Email { get; set; }
+
         [Required]
-        public string PasswordHash { get; set; }
+        public string Passwordhash { get; set; }
+
         [Required]
-        public List<DomainEntity> Domains { get; set; }
+        public string Firstname { get; set; }
+
+        public string Middlename { get; set; }
+
+        [Required]
+        public string Lastname { get; set; }
+
+        [Required]
+        public virtual JwtConfigurationEntity UsersJwtConfiguration { get; set; }
+
+        [Required]
+        public virtual ICollection<DomainEntity> Domains { get; set; }
+
+        [Required]
+        public virtual ICollection<LanguageEntity> Languages { get; set; }
+
+        [Required]
+        public virtual UserSchemaEntity UserSchema { get; set; }
+        [Required]
+        public virtual DashboardEntity DashboardModel { get; set; }
     }
 }

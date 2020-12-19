@@ -1,4 +1,4 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain;
+﻿using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using AuthenticationServer.Domain.DataAccess.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,16 +13,22 @@ namespace Authentication.Persistance
             services.AddDbContext<MainContext>(options =>
                          options.UseSqlServer(
                              configuration.GetConnectionString("MainConnection")));
-            services.AddScoped<ISqlDataAccess, MainSqlDataAccess>();
+
+            services.AddScoped<IMainSqlDataAccess, MainSqlDataAccess>();
 
             services.Scan(scan => scan
-                .FromAssemblyOf<ISqlDataAccess>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Data")))
+                .FromAssemblyOf<IPersistanceAssembly>()
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsMatchingInterface()
                 .WithScopedLifetime()
-                );
+            );
 
             return services;
         }
+    }
+
+    public interface IPersistanceAssembly
+    {
+
     }
 }

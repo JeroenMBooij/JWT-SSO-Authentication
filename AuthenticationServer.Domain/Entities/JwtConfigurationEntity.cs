@@ -5,15 +5,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthenticationServer.Domain.Entities
 {
-    [Table("jwt_configuration")]
+    [Table("JwtConfigurations")]
     public class JwtConfigurationEntity : AuditableData
     {
+
         [Key]
-        public int Id { get; set; }
+        [Column("id")]
+        public Guid TenantId { get; set; }
+
         [Required]
+        [Column("nbf")]
         public DateTimeOffset Nbf { get; set; }
+
         [Required]
+        [Column("exp")]
         public DateTimeOffset Exp { get; set; }
+
+        [Required]
+        public virtual TenantEntity Tenant { get; set; }
 
     }
 }

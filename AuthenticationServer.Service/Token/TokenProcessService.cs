@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace AuthenticationServer.Service
+namespace AuthenticationServer.Service.Token
 {
     public class TokenProcessService : ITokenProcessService
     {
@@ -17,7 +17,7 @@ namespace AuthenticationServer.Service
 
         public JToken Deserialize(string token)
         {
-            //TODO: improve validations exceptions
+            //TODO: move to jwtManager
             if (!IsValid(token))
                 throw new ArgumentException("Given token is not valid");
 

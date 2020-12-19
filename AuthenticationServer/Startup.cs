@@ -1,17 +1,17 @@
-using Authentication.Logic;
 using Authentication.Persistance;
-using Authentication.Service;
+using AuthenticationServer.Infrastructure;
+using AuthenticationServer.Logic;
+using AuthenticationServer.Service;
+using AuthenticationServer.Web.Middleware;
+using AuthenticationServer.Web.Middleware.Attributes;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using System;
-using System.IO;
-using System.Reflection;
 
-namespace AuthenticationServer
+namespace AuthenticationServer.Web
 {
     public class Startup
     {
@@ -22,52 +22,63 @@ namespace AuthenticationServer
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             #region endpoints
             services.AddControllers();
-            services.AddMvc().AddNewtonsoftJson();
+
+            services.AddMySwagger();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials()
+                            .Build());
+            });
+
+            services.AddMvc()
+                .AddFluentValidation(mvcConfig => mvcConfig.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .AddNewtonsoftJson();
+
+            #region Controller Attributes
+            services.Scan(scan => scan
+                .FromAssemblyOf<IWebAssembly>()
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Attribute")))
+                .AsSelf()
+                .WithScopedLifetime()
+            );
             #endregion
 
-            #region Swagger
-            // Set the comments path for the Swagger JSON and UI.
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "Jiren's Authentication Server",
-                    Description = "An API to handle all your application authentication and authorization needs. " +
-                                    "By integrating this service you can monitor everything your users do. To start using this service, become a Tenant now!",
-                    TermsOfService = new Uri("https://example.com/terms"),
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Jeroen Booij",
-                        Email = "jmbooij.a@gmail.com",
-                        Url = new Uri("https://www.facebook.com/people/Jeroen-Booij/100018633216320"),
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "Use under LICX",
-                        Url = new Uri("https://example.com/license"),
-                    }
-                });
-                c.IncludeXmlComments(Path.Combine(System.AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
-            });
             #endregion
+
 
             #region Clean Dependency Injection
-            services.AddPersistance(Configuration);
-            services.AddServices();
             services.AddLogic();
+            services.AddServices();
+            services.AddPersistance(Configuration);
+            services.AddInfrastructure(Configuration);
             #endregion
+
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            #region routing
+            app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+            app.UseAuthentication();
+            #endregion
+
             #region configuration
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -96,14 +107,12 @@ namespace AuthenticationServer
             });
             #endregion
 
-            #region routing
-            app.UseHttpsRedirection();
-            app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-            #endregion
+
         }
+    }
+
+    public interface IWebAssembly
+    {
+
     }
 }

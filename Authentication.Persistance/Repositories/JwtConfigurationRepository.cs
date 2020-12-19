@@ -1,6 +1,6 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain;
-using AuthenticationServer.Common.Models.ResponseModels;
-using AuthenticationServer.Common.Models.ResponseModels.Common;
+﻿using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
+using AuthenticationServer.Common.Interfaces.Domain.Repositories;
+using AuthenticationServer.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -10,51 +10,43 @@ namespace Authentication.Persistance.Repositories
 {
     public class JwtConfigurationRepository : IJwtConfigurationRepository
     {
-        private readonly ISqlDataAccess _db;
+        private readonly IMainSqlDataAccess _db;
         private readonly IConfiguration _config;
 
-        public JwtConfigurationRepository(ISqlDataAccess _db, IConfiguration config)
+        public JwtConfigurationRepository(IMainSqlDataAccess _db, IConfiguration config)
         {
             this._db = _db;
             _config = config;
         }
 
-        public Task CreateJwtConfiguration(JwtConfiguration tenant, int domainId)
+        public Task CreateJwtConfiguration(JwtConfigurationEntity jwtConfigurationEntity)
         {
             throw new NotImplementedException();
         }
 
-        public Task Delete<T>(T data)
+        public Task Delete(JwtConfigurationEntity jwtConfigurationEntity)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<JwtConfiguration> Get<JwtConfiguration>(string id)
+        public async Task<JwtConfigurationEntity> Get(string id)
         {
             string sql = $"SELECT * FROM jwt_configuration WHERE id = {id}";
 
-            return await _db.GetData<JwtConfiguration, dynamic>(sql, new { });
+            return await _db.GetData<JwtConfigurationEntity, dynamic>(sql, new { });
         }
 
-        public Task<List<JwtConfiguration>> GetAll<JwtConfiguration>()
+        public Task<List<JwtConfigurationEntity>> GetAll()
         {
             throw new NotImplementedException();
         }
 
-        public JwtConfiguration GetJwtConfigurationFromAccount(Account account)
-        {
-            JwtConfiguration jwtContainerModel = _config.GetSection("JWTSecurity").Get<JwtConfiguration>();
-            jwtContainerModel.Claims = account.Claims;
-
-            return jwtContainerModel;
-        }
-
-        public Task<JwtConfiguration> GetJwtConfigurationFromUser(Account account)
+        public Task<JwtConfigurationEntity> GetJWTContainerModel(int currentDomainId)
         {
             throw new NotImplementedException();
         }
 
-        public Task Insert<JwtConfiguration>(JwtConfiguration user)
+        public Task Insert(JwtConfigurationEntity user)
         {
             string sql = @"insert into dbo.Users (Name, Email)
                             values (@Name, @Email);";
@@ -62,7 +54,7 @@ namespace Authentication.Persistance.Repositories
             return _db.SaveData(sql, user);
         }
 
-        public Task Update<T>(T data)
+        public Task Update(JwtConfigurationEntity jwtConfigurationEntity)
         {
             throw new NotImplementedException();
         }

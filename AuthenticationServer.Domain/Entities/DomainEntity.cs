@@ -1,4 +1,5 @@
 ﻿using AuthenticationServer.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,14 +9,29 @@ namespace AuthenticationServer.Domain.Entities
     [Table("Domains")]
     public class DomainEntity : AuditableData
     {
+        public DomainEntity()
+        {
+            User = new HashSet<UserEntity>();
+        }
+
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+
         [Required]
-        public string URL { get; set; }
+        public string Url { get; set; }
+
         [Required]
-        public List<UserEntity> User { get; set; }
+        public Guid TenantId { get; set; }
+        public string LogoLocation { get; set; }
+
+
+
         [Required]
-        public TenantEntity Tenant { get; set; }
+        public virtual ICollection<UserEntity> User { get; set; }
+
+        [Required]
+        public virtual TenantEntity Tenant { get; set; }
+
 
     }
 }
