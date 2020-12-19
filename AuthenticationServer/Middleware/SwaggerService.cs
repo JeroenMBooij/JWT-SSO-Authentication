@@ -12,15 +12,15 @@ namespace AuthenticationServer.Web.Middleware
         public static IServiceCollection AddMySwagger(this IServiceCollection services)
         {
             #region Swagger
-            // Set the comments path for the Swagger JSON and UI.
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "Jiren's Authentication Server",
-                    Description = "An API to handle all your application authentication and authorization needs. " +
-                                    "By integrating this service you can monitor everything your users do. To start using this service, become a Tenant now!",
+                    Description = @"An API to handle all your application authentication and authorization needs.
+                                    By integrating this service you can configure and monitor everything your users do on your applications. 
+                                    To start using this service, become a Tenant now!",
                     TermsOfService = new Uri("https://example.com/terms"),
                     Contact = new OpenApiContact
                     {
@@ -34,28 +34,21 @@ namespace AuthenticationServer.Web.Middleware
                         Url = new Uri("https://example.com/license"),
                     }
                 });
-                options.IncludeXmlComments(Path.Combine(System.AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+
+                var securityScheme = new OpenApiSecurityScheme()
                 {
                     In = ParameterLocation.Header,
-                    Name = "tenant-authorization"
-                });
+                    Name = "tenant-authorization",
+                    Description = @"Use your tenant Jwt to authenticate every call you make to the the authentication server.",
+                    Scheme = "oauth1"
+                };
+                options.AddSecurityDefinition("Jwt Token", securityScheme);
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement()
                 {
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth1",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
-
-                        },
+                        securityScheme,
                         new List<string>()
                     }
                 });

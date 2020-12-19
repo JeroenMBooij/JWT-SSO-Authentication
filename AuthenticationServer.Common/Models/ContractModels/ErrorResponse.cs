@@ -1,6 +1,5 @@
-﻿using System;
+﻿using AuthenticationServer.Common.Models.ContractModels.Common;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AuthenticationServer.Common.Models.ContractModels
 {

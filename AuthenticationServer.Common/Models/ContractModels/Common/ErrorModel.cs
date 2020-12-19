@@ -1,4 +1,6 @@
-﻿namespace AuthenticationServer.Common.Models.ContractModels
+﻿
+
+namespace AuthenticationServer.Common.Models.ContractModels.Common
 {
     public class ErrorModel
     {

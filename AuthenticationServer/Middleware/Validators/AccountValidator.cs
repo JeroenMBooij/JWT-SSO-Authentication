@@ -2,12 +2,9 @@
 using AuthenticationServer.Common.Models.ContractModels.Common;
 using AuthenticationServer.Domain.Entities;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace AuthenticationServer.Web.Validators
+namespace AuthenticationServer.Web.Middleware.Validators
 {
     public class AccountValidator<T> : AbstractValidator<T> where T : AbstractAccount
     {
@@ -28,7 +25,7 @@ namespace AuthenticationServer.Web.Validators
             LanguageEntity languageEntity = await _languageRepository.GetLanguageByName(languageName);
             if (languageEntity == null)
                 return false;
-            
+
             return true;
         }
     }

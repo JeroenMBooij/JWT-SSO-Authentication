@@ -1,4 +1,7 @@
 ﻿using AuthenticationServer.Common.Interfaces.Logic.Managers;
+using AuthenticationServer.Common.Models.ContractModels;
+using AuthenticationServer.Common.Models.ContractModels.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace AuthenticationServer.Web.Middleware.Attributes
@@ -13,11 +16,24 @@ namespace AuthenticationServer.Web.Middleware.Attributes
         }
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var jwt = _jwtManager;
-            
-            var test = filterContext.HttpContext.Request.Headers["tenant-authorization"];
-            var host = filterContext.HttpContext.Request.Host.Value;
-            base.OnActionExecuting(filterContext);
+            var tenantToken = filterContext.HttpContext.Request.Headers["tenant-authorization"];
+            if (string.IsNullOrEmpty(tenantToken))
+            {
+                var errorResponse = new ErrorResponse();
+                errorResponse.Errors.Add(new ErrorModel() { FieldName = "tenant-authorization header", Message = "token is empty." });
+                filterContext.Result = new BadRequestObjectResult(errorResponse);
+                return;
+            }
+
+            if (!_jwtManager.IsTokenValid(tenantToken))
+            {
+                var errorResponse = new ErrorResponse();
+                errorResponse.Errors.Add(new ErrorModel() { FieldName = "tenant-authorization header", Message = "Invalid Token" });
+                filterContext.Result = new BadRequestObjectResult(errorResponse);
+                return;
+            }
+            else
+                base.OnActionExecuting(filterContext);
         }
     }
 }

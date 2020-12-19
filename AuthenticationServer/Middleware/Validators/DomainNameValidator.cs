@@ -2,7 +2,7 @@
 using FluentValidation;
 using System;
 
-namespace AuthenticationServer.Web.Validators
+namespace AuthenticationServer.Web.Middleware.Validators
 {
     public class DomainNameValidator : AbstractValidator<DomainName>
     {

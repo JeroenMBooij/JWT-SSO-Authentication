@@ -7,7 +7,7 @@ using Newtonsoft.Json.Schema;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AuthenticationServer.Web.Validators
+namespace AuthenticationServer.Web.Middleware.Validators
 {
     public class UserValidator : AccountValidator<User>
     {

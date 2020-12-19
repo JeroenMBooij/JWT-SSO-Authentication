@@ -1,7 +1,7 @@
 ﻿using AuthenticationServer.Common.Models.ContractModels;
+using AuthenticationServer.Common.Models.ContractModels.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,9 +20,9 @@ namespace AuthenticationServer.Web.Middleware.Filters
 
                 var errorResponse = new ErrorResponse();
 
-                foreach(var error in errorsInModelState)
+                foreach (var error in errorsInModelState)
                 {
-                    foreach(var subError in error.Value)
+                    foreach (var subError in error.Value)
                     {
                         var errorModel = new ErrorModel()
                         {

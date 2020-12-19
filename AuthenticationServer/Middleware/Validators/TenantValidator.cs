@@ -1,7 +1,7 @@
 ﻿using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Models.ContractModels;
 
-namespace AuthenticationServer.Web.Validators
+namespace AuthenticationServer.Web.Middleware.Validators
 {
     public class TenantValidator : AccountValidator<Tenant>
     {
