@@ -1,7 +1,5 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain.Repositories;
-using AuthenticationServer.Common.Models.DTOs.Common;
+﻿using AuthenticationServer.Common.Models.DTOs.Common;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace AuthenticationServer.Common.Models.DTOs
 {

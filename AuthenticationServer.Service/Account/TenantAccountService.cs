@@ -9,24 +9,31 @@ namespace AuthenticationServer.Service.Account
 {
     public class TenantAccountService : ITenantAccountService
     {
+        private readonly IMapper _mapper;
         private readonly IJwtManager _jwtManager;
         private readonly ITenantAccountManager _tenantAccountManager;
-        private readonly IMapper _mapper;
+        private readonly IEmailManager _emailManager;
 
-        public TenantAccountService(IJwtManager jwtManager, ITenantAccountManager accountManager, IMapper mapper)
+        public TenantAccountService(IMapper mapper, IJwtManager jwtManager, 
+            ITenantAccountManager accountManager, IEmailManager emailManager)
         {
             _jwtManager = jwtManager;
             _tenantAccountManager = accountManager;
+            _emailManager = emailManager;
             _mapper = mapper;
         }
 
-
+        public Task<string> LoginTenantAsync(Credentials credentials)
+        {
+            throw new System.NotImplementedException();
+        }
 
         public async Task<string> RegisterTenantAsync(Tenant tenant)
         {
-            await _tenantAccountManager.CreateTenantAccountAsync(_mapper.Map<TenantDto>(tenant));
+            TenantDto tenantDto = await _tenantAccountManager.CreateTenantAccountAsync(_mapper.Map<TenantDto>(tenant));
 
-            //TODO email confirmation
+            await _emailManager.SendVerificationEmail(tenant.Email, tenantDto.Id);
+
             return $"An Email has been send to {tenant.Email}. Please confirm your Email to complete your registration.";
         }
 

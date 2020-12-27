@@ -3,8 +3,8 @@ using AuthenticationServer.Infrastructure;
 using AuthenticationServer.Logic;
 using AuthenticationServer.Service;
 using AuthenticationServer.Web.Middleware;
-using AuthenticationServer.Web.Middleware.Attributes;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -25,43 +25,16 @@ namespace AuthenticationServer.Web
         public void ConfigureServices(IServiceCollection services)
         {
             #region endpoints
-            services.AddControllers();
-
+            services.AddMyEndpoints();
             services.AddMySwagger();
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy", builder =>
-                    builder.AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials()
-                            .Build());
-            });
-
-            services.AddMvc()
-                .AddFluentValidation(mvcConfig => mvcConfig.RegisterValidatorsFromAssemblyContaining<Startup>())
-                .AddNewtonsoftJson();
-
-            #region Controller Attributes
-            services.Scan(scan => scan
-                .FromAssemblyOf<IWebAssembly>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Attribute")))
-                .AsSelf()
-                .WithScopedLifetime()
-            );
             #endregion
-
-            #endregion
-
 
             #region Clean Dependency Injection
-            services.AddLogic();
+            services.AddLogic(Configuration);
             services.AddServices();
             services.AddPersistance(Configuration);
             services.AddInfrastructure(Configuration);
             #endregion
-
 
         }
 
@@ -100,10 +73,10 @@ namespace AuthenticationServer.Web
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseSwaggerUI(configure =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = string.Empty;
+                configure.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                configure.RoutePrefix = string.Empty;
             });
             #endregion
 

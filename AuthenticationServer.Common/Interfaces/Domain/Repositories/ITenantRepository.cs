@@ -16,5 +16,6 @@ namespace AuthenticationServer.Common.Interfaces.Domain.Repositories
 
 
         Task<JwtConfigurationDto> GetTenantJwtConfiguration(TenantEntity tenantDTO);
+        Task SetVerified(Guid id);
     }
 }

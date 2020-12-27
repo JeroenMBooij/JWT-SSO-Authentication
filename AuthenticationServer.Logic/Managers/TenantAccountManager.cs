@@ -4,6 +4,7 @@ using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Models.DTOs;
 using AuthenticationServer.Domain.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Threading.Tasks;
 
@@ -25,14 +26,14 @@ namespace AuthenticationServer.Logic.Managers
             _mapper = mapper;
         }
 
-        public async Task CreateTenantAccountAsync(TenantDto tenantDto)
+        public async Task<TenantDto> CreateTenantAccountAsync(TenantDto tenantDto)
         {
             //TODO catch duplicate GUID
             await PopulateTenantPropertiesForNewAccountAsync(tenantDto);
 
             await _tenantRepository.Insert(_mapper.Map<TenantEntity>(tenantDto));
 
-            //TODO Confirm Email
+            return tenantDto;
         }
 
         private async Task PopulateTenantPropertiesForNewAccountAsync(TenantDto tenantDto)

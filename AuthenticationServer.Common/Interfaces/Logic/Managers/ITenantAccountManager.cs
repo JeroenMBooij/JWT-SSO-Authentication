@@ -5,6 +5,6 @@ namespace AuthenticationServer.Common.Interfaces.Logic.Managers
 {
     public interface ITenantAccountManager
     {
-        Task CreateTenantAccountAsync(TenantDto tenant);
+        Task<TenantDto> CreateTenantAccountAsync(TenantDto tenant);
     }
 }

@@ -13,10 +13,8 @@ namespace AuthenticationServer.Common.Extentions
                 {
                     masterDictionary.Add(key, value);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    //TODO log exception
-                    var test = "";
                 }
             }
 

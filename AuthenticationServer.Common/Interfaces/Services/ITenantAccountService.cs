@@ -6,5 +6,6 @@ namespace AuthenticationServer.Common.Interfaces.Services
     public interface ITenantAccountService
     {
         Task<string> RegisterTenantAsync(Tenant tenant);
+        Task<string> LoginTenantAsync(Credentials credentials);
     }
 }

@@ -10,6 +10,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
         }
 
         public override int SaveChanges()

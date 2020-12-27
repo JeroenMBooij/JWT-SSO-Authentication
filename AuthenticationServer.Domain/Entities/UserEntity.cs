@@ -16,6 +16,9 @@ namespace AuthenticationServer.Domain.Entities
         public string Email { get; set; }
 
         [Required]
+        public bool EmailVerified { get; set; }
+
+        [Required]
         public string PasswordHash { get; set; }
 
         [Required]

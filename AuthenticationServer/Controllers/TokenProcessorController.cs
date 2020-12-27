@@ -36,7 +36,6 @@ namespace AuthenticationServer.Web.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Validate/{token}")]
-        [Authorize]
         public JToken ValidateToken(string token)
         {
             return _tokenProcessService.IsValid(token);

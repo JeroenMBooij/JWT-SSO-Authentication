@@ -24,15 +24,11 @@ namespace Authentication.Persistance.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Model")
                         .IsRequired()
@@ -43,21 +39,17 @@ namespace Authentication.Persistance.Migrations
                     b.ToTable("Dashboards");
                 });
 
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DomainNameEntity", b =>
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DomainEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("LogoLocation")
                         .HasColumnType("nvarchar(max)");
@@ -79,26 +71,19 @@ namespace Authentication.Persistance.Migrations
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.JwtConfigurationEntity", b =>
                 {
                     b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id");
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTimeOffset>("Exp")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("exp");
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTimeOffset>("Nbf")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("nbf");
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("TenantId");
 
@@ -115,15 +100,11 @@ namespace Authentication.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -144,15 +125,11 @@ namespace Authentication.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -169,23 +146,22 @@ namespace Authentication.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Firstname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Lastname")
                         .IsRequired()
@@ -209,23 +185,22 @@ namespace Authentication.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Firstname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Lastname")
                         .HasColumnType("nvarchar(max)");
@@ -247,15 +222,11 @@ namespace Authentication.Persistance.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("SchemaTenantId")
                         .HasColumnType("uniqueidentifier");
@@ -276,19 +247,15 @@ namespace Authentication.Persistance.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime?>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("DataModel")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TrackModel")
                         .IsRequired()
@@ -299,7 +266,7 @@ namespace Authentication.Persistance.Migrations
                     b.ToTable("UserSchemas");
                 });
 
-            modelBuilder.Entity("DomainNameEntityUserEntity", b =>
+            modelBuilder.Entity("DomainEntityUserEntity", b =>
                 {
                     b.Property<Guid>("DomainsId")
                         .HasColumnType("uniqueidentifier");
@@ -311,7 +278,7 @@ namespace Authentication.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DomainNameEntityUserEntity");
+                    b.ToTable("DomainEntityUserEntity");
                 });
 
             modelBuilder.Entity("LanguageEntityTenantEntity", b =>
@@ -370,7 +337,7 @@ namespace Authentication.Persistance.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DomainNameEntity", b =>
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DomainEntity", b =>
                 {
                     b.HasOne("AuthenticationServer.Domain.Entities.TenantEntity", "Tenant")
                         .WithMany("Domains")
@@ -422,9 +389,9 @@ namespace Authentication.Persistance.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("DomainNameEntityUserEntity", b =>
+            modelBuilder.Entity("DomainEntityUserEntity", b =>
                 {
-                    b.HasOne("AuthenticationServer.Domain.Entities.DomainNameEntity", null)
+                    b.HasOne("AuthenticationServer.Domain.Entities.DomainEntity", null)
                         .WithMany()
                         .HasForeignKey("DomainsId")
                         .OnDelete(DeleteBehavior.Cascade)

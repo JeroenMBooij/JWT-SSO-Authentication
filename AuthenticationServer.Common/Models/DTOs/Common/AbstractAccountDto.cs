@@ -7,6 +7,7 @@ namespace AuthenticationServer.Common.Models.DTOs.Common
     {
         public Guid Id { get; set; }
         public string Email { get; set; }
+        public bool EmailVerified { get; set; }
         public string Password { get; set; }
         public string Passwordhash { get; set; }
         public string Firstname { get; set; }

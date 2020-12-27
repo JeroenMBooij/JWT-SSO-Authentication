@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AuthenticationServer.Web.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class TenantAccountController : ControllerBase
     {
@@ -17,9 +17,17 @@ namespace AuthenticationServer.Web.Controllers
         }
 
         [HttpPost]
+        [Route("Register")]
         public async Task<string> RegisterTenant([FromBody]Tenant tenant)
         {
             return await _tenantAccountService.RegisterTenantAsync(tenant);
+        }
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task<string> LoginTenant([FromBody] Credentials credentials)
+        {
+            return await _tenantAccountService.LoginTenantAsync(credentials);
         }
     }
 }

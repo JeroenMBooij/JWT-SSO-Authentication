@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AuthenticationServer.Domain.Entities
 {
     [Table("Tenants")]
-    public class TenantEntity : AuditableData
+    public class TenantEntity
     {
         public TenantEntity()
         {
@@ -19,6 +19,9 @@ namespace AuthenticationServer.Domain.Entities
 
         [Required]
         public string Email { get; set; }
+
+        [Required]
+        public bool EmailVerified { get; set; }
 
         [Required]
         public string Passwordhash { get; set; }

@@ -4,6 +4,7 @@ using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Models.DTOs;
 using AuthenticationServer.Domain.Entities;
 using Dapper;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +14,12 @@ namespace Authentication.Persistance.Repositories
     public class TenantRepository : AbstractRepository, ITenantRepository
     {
         private readonly IMainSqlDataAccess _db;
+        private readonly IConfiguration _config;
 
-        public TenantRepository(IMainSqlDataAccess _db)
+        public TenantRepository(IMainSqlDataAccess _db, IConfiguration config)
         {
             this._db = _db;
+            _config = config;
         }
 
         public Task Delete(TenantEntity tenantEntity)
@@ -24,9 +27,12 @@ namespace Authentication.Persistance.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task<TenantEntity> Get(Guid Id)
+        public async Task<TenantEntity> Get(Guid id)
         {
-            throw new System.NotImplementedException();
+            string sql = $"SELECT * FROM dbo.Tenants where Id = @Id";
+            var parameters = new { Id = id.ToString() };
+
+            return await _db.GetData<TenantEntity, dynamic>(sql, parameters);
         }
 
         public Task<List<TenantEntity>> GetAll()
@@ -39,7 +45,7 @@ namespace Authentication.Persistance.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task Insert(TenantEntity tenantEntity)
+        public async Task Insert(TenantEntity tenantEntity)
         {
             var parametersToStoredProcedure = new Dictionary<object, string>();
 
@@ -65,7 +71,15 @@ namespace Authentication.Persistance.Repositories
                 parametersToStoredProcedure.Add(tenantLanguageParameters, "sp_insert_tenant_language");
             }
 
-            return _db.ExecuteStoredProcedures(parametersToStoredProcedure);
+            await _db.ExecuteStoredProcedures(parametersToStoredProcedure);
+        }
+
+        public async Task SetVerified(Guid id)
+        {
+            string sql = $"UPDATE dbo.Tenants SET EmailVerified = '1' where Id = @Id";
+            var parameters = new { Id = id.ToString() };
+
+            await _db.GetData<TenantEntity, dynamic>(sql, parameters);
         }
 
         public Task Update(TenantEntity tenantEntity)

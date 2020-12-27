@@ -5,12 +5,9 @@ namespace AuthenticationServer.Domain.Common
 {
     public class AuditableData
     {
-        [Column("created")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Created { get; set; }
-
-        [Column("last_modified")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime Created { get; set; } = DateTime.Now;
         public DateTime? LastModified { get; set; }
+
+
     }
 }

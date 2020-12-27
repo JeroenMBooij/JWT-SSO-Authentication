@@ -20,7 +20,7 @@ namespace AuthenticationServer.Web.Middleware.Attributes
             if (string.IsNullOrEmpty(tenantToken))
             {
                 var errorResponse = new ErrorResponse();
-                errorResponse.Errors.Add(new ErrorModel() { FieldName = "tenant-authorization header", Message = "token is empty." });
+                errorResponse.Errors.Add(new ErrorModel() { FieldName = "tenant-authorization header", Message = "Token is empty." });
                 filterContext.Result = new BadRequestObjectResult(errorResponse);
                 return;
             }

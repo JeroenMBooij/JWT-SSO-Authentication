@@ -1,5 +1,4 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain;
-using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
+﻿using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -55,7 +54,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                using(var transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction())
                 {
                     try
                     {
@@ -64,19 +63,39 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
                         transaction.Commit();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         transaction.Rollback();
                         throw new Exception($"saving your changes in the database failed: {ex.Message}");
                     }
                 }
-                
+
             }
         }
 
-        public Task SaveData<T>(string sql, T parameters)
+        public async Task SaveData<T>(string sql, T parameters)
         {
-            throw new NotImplementedException();
+            string connectionString = _config.GetConnectionString(Connectionstring);
+
+            using (IDbConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        await connection.ExecuteAsync(sql, parameters);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception($"saving your changes in the database failed: {ex.Message}");
+                    }
+                }
+
+            }
         }
     }
 }
