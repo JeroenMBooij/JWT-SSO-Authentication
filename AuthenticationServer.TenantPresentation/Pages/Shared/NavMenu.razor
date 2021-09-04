@@ -1,0 +1,55 @@
+﻿<div class="top-row navbar navbar-dark">
+    <div class="d-flex flex-wrap">
+        <image src="images/authentication-logo.png" class="logo-img"></image>
+        <p class="logo-txt-p1">Jeroen's</p>
+        <p class="logo-txt-p2">Authentication Server</p>
+    </div>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="home" Match="NavLinkMatch.All"
+                     @onclick='() => SetHeader(Localizer["Home"])'>
+                <span class="oi oi-home" aria-hidden="true"></span> @Localizer["Home"]
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="account-settings" Match="NavLinkMatch.All"
+                     @onclick='() => SetHeader(Localizer["AccountSettings"])'>
+                <span class="oi oi-cog" aria-hidden="true"></span> @Localizer["AccountSettings"]
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All"
+                     @onclick='() => SetHeader(Localizer["Information"])'>
+                <span class="oi oi-info" aria-hidden="true"></span> @Localizer["Information"]
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="swagger" Match="NavLinkMatch.All"
+                     @onclick='() => SetHeader(Localizer["Swagger"])'>
+                <span class="oi oi-plus" aria-hidden="true"></span> @Localizer["Swagger"]
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="dashboard" Match="NavLinkMatch.All"
+                     @onclick='() => SetHeader(Localizer["Dashboards"])'>
+                <span class="oi oi-list-rich" aria-hidden="true"></span> @Localizer["Dashboards"]
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All"
+                     @onclick='LogOut'>
+                <span class="oi oi-circle-x" aria-hidden="true"></span> @Localizer["Logout"]
+            </NavLink>
+        </li>
+        <li class="nav-item px-3 show">
+            <LanguageComponent />
+        </li>
+    </ul>
+</div>
+

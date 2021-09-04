@@ -1,0 +1,28 @@
+﻿.lang-img {
+    position: relative;
+    height: 32px;
+    width: 32px;
+    margin-right: 45px;
+    cursor: pointer;
+    top: 1px;
+    left: 1px;
+}
+
+.selected-border {
+    border: 3px solid var(--main-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+.lang-containter {
+    position: relative;
+    cursor: pointer;
+    max-width: 40px;
+    margin-right: 45px;
+    top: 30px;
+}
+
+.h-100px{
+    height: 100px;
+}

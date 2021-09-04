@@ -1,4 +1,5 @@
-﻿using AuthenticationServer.Common.Interfaces.Services;
+﻿using AuthenticationServer.Common.Interfaces.Logic.Managers;
+using AuthenticationServer.Common.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System;
@@ -8,37 +9,25 @@ namespace AuthenticationServer.Service.Token
 {
     public class TokenProcessService : ITokenProcessService
     {
+        private readonly IJwtManager _jwtManager;
         private readonly IConfiguration _config;
 
-        public TokenProcessService(IConfiguration config)
+        public TokenProcessService(IJwtManager jwtManager, IConfiguration config)
         {
+            _jwtManager = jwtManager;
             _config = config;
         }
 
         public JToken Deserialize(string token)
         {
-            //TODO: move to jwtManager
-            if (!IsValid(token))
-                throw new ArgumentException("Given token is not valid");
+            ValidateToken(token);
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = (JwtSecurityToken)handler.ReadToken(token);
-            var claims = jwtSecurityToken.Claims;
-
-            var jsonToken = new JObject();
-            foreach (var claim in claims)
-                jsonToken.Add(claim.Type, claim.Value);
-
-            return jsonToken;
+            return _jwtManager.DeserializeToken(token);
         }
 
-        public bool IsValid(string token)
+        public bool ValidateToken(string token)
         {
-            //JwtConfiguration jwtContainerModel = _config.GetSection("JWTSecurity").Get<JwtConfiguration>();
-
-            //var jwtManager = new JWTManager(jwtContainerModel.SecretKey);
-
-            return true; // jwtManager.IsTokenValid(token);
+            return _jwtManager.IsTokenValid(token);
         }
     }
 }

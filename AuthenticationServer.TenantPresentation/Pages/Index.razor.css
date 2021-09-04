@@ -1,0 +1,28 @@
+﻿
+.auth-container {
+    height: 100px;
+    position: relative;
+    text-align: center;
+    text-decoration: underline;
+}
+
+    canvas {
+        cursor: pointer;
+    }
+
+    canvas + p {
+        cursor: pointer;
+    }
+
+    canvas:hover + p {
+        -webkit-animation: coolwhite-neon 1.5s ease-in-out infinite alternate;
+        -moz-animation: coolwhite-neon 1.5s ease-in-out infinite alternate;
+        animation: coolwhite-neon 1.5s ease-in-out infinite alternate;
+    }
+
+    .centered {
+        position: absolute;
+        top: 80%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }

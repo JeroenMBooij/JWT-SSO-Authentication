@@ -1,0 +1,12 @@
+﻿<div class="d-flex justify-content-end h-100px">
+    <div>
+        <div @onclick='(() => SelectCulture("nl-NL"))' class="lang-containter @(currentCulture == "nl-NL" ? "selected-border" : "")">
+            <image src="images/dutchFlag.png" class="lang-img"></image>
+        </div>
+    </div>
+    <div>
+        <div @onclick='(() => SelectCulture("en-US"))' class="lang-containter @(currentCulture == "en-US" ? "selected-border" : "")">
+            <image src="images/usaFlag.png" class="lang-img"></image>
+        </div>
+    </div>
+</div>

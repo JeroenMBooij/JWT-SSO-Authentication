@@ -1,26 +1,17 @@
-﻿using AuthenticationServer.Domain.Common;
+﻿using Microsoft.AspNetCore.Identity;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthenticationServer.Domain.Entities
 {
-    [Table("Roles")]
-    public class RoleEntity : AuditableData
+    public class RoleEntity : IdentityRole<Guid>
     {
+        public RoleEntity(string roleName)
+            :base(roleName)
+        {}
+
         public RoleEntity()
         {
-            Users = new HashSet<UserEntity>();
+
         }
-        [Key]
-        public Guid Id { get; set; }
-
-        [Required]
-        public string Name { get; set; }
-
-        [Required]
-        public virtual ICollection<UserEntity> Users { get; set; }
-       
     }
 }

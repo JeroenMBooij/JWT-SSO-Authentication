@@ -1,0 +1,45 @@
+﻿@page "/login"
+@layout CleanLayout
+
+@if (Registered)
+{
+    <div class="row align-items-center justify-content-center h-100 mw-100">
+        <div class="w-30 mw-30">
+            <h1>@(Localizer["HelloWorld"])</h1>
+            <EditForm Model="@Credentials" OnValidSubmit="@HandleLogin">
+                <div class="row">
+                    <input type="email" class="form-control" @bind="Credentials.Email" required placeholder="@(Localizer["EmailAddress"])">
+                </div>
+                <div class="row pt-3">
+                    <input type="password" class="form-control" @bind="Credentials.Password" required placeholder="@(Localizer["Password"])">
+                </div>
+                <span class="text-danger">@LoginErrorMessage</span>
+
+                <div class="d-flex justify-content-end">
+                    <a class="main-font-link" href="reset-password">@(Localizer["ForgotPassword"])</a>
+                </div>
+                <div class="d-flex justify-content-sm-center pt-3">
+                    <input class="btn main-button" type="submit" value="@(Localizer["Log"])">
+                </div>
+            </EditForm>
+
+            <div class="text-center pt-5">
+                @(Localizer["NoAccount"])
+                <br />
+                <EditForm Model="@NewEmail" OnValidSubmit="@HandleRegister">
+                    <div class="row">
+                        <input type="email" class="form-control" @bind="NewEmail" required placeholder="@(Localizer["EmailAddress"])">
+                    </div>
+
+                    <div class="d-flex justify-content-sm-center pt-3">
+                        <input class="btn main-button" type="submit" value="@(Localizer["Register"])">
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <Register Email="@NewEmail"/>
+}

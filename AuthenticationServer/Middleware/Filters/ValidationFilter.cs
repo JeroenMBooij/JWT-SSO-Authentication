@@ -1,5 +1,5 @@
 ﻿using AuthenticationServer.Common.Models.ContractModels;
-using AuthenticationServer.Common.Models.ContractModels.Common;
+using AuthenticationServer.Common.Models.ContractModels.Account;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace AuthenticationServer.Web.Middleware.Filters
     {
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (context.ModelState.IsValid)
+            if (!context.ModelState.IsValid)
             {
                 KeyValuePair<string, IEnumerable<string>>[] errorsInModelState = context.ModelState
                     .Where(x => x.Value.Errors.Count > 0)
@@ -33,6 +33,8 @@ namespace AuthenticationServer.Web.Middleware.Filters
                         errorResponse.Errors.Add(errorModel);
                     }
                 }
+
+                context.HttpContext.Response.StatusCode = 400;
                 context.Result = new BadRequestObjectResult(errorResponse);
                 return;
             }

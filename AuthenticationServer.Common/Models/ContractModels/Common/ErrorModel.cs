@@ -1,6 +1,6 @@
 ﻿
 
-namespace AuthenticationServer.Common.Models.ContractModels.Common
+namespace AuthenticationServer.Common.Models.ContractModels.Account
 {
     public class ErrorModel
     {

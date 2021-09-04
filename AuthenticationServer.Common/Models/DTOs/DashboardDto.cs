@@ -6,14 +6,14 @@ namespace AuthenticationServer.Common.Models.DTOs
 {
     public class DashboardDto
     {
-        private TenantDto _tenant;
+        private AccountDto _tenant;
 
         public Guid TenantId { get; set; }
 
         [Required]
         public JToken Model { get; set; }
 
-        public TenantDto Tenant
+        public AccountDto Tenant
         {
             get => _tenant;
             set

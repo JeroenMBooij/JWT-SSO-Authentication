@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthenticationServer.Common\AuthenticationServer.Common.csproj" />
+    <ProjectReference Include="..\AuthenticationServer.Logic\AuthenticationServer.Logic.csproj" />
   </ItemGroup>
 
 </Project>

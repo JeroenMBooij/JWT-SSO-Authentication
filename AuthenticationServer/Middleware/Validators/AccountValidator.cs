@@ -1,5 +1,5 @@
 ﻿using AuthenticationServer.Common.Interfaces.Domain.Repositories;
-using AuthenticationServer.Common.Models.ContractModels.Common;
+using AuthenticationServer.Common.Models.ContractModels.Account;
 using AuthenticationServer.Domain.Entities;
 using FluentValidation;
 using System.Threading.Tasks;
@@ -13,6 +13,10 @@ namespace AuthenticationServer.Web.Middleware.Validators
         public AccountValidator(ILanguageRepository languageRepository)
         {
             _languageRepository = languageRepository;
+
+            RuleFor(account => account.Email)
+            .EmailAddress()
+            .WithMessage("A valid email address is required.");
 
             RuleForEach(account => account.Languages)
                 .NotNull().WithMessage("{PropertyName} cannot be empty")

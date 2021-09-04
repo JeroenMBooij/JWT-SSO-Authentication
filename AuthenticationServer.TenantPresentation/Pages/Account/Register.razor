@@ -1,0 +1,73 @@
+﻿
+@if (!RegistrationSuccess)
+{
+    <div class="row align-items-center justify-content-center h-100 mw-100">
+        <div class="w-30 mw-30">
+            <h1>@(Localizer["HelloWorld"])</h1>
+            <EditForm Model="@Tenant" OnValidSubmit="@HandleRegistration">
+                <div class="row">
+                    <input type="email" class="form-control" @bind="Email" required placeholder="@(Localizer["EmailAddress"])">
+                </div>
+                <div class="row pt-3">
+                    <input type="text" class="form-control" @bind="Tenant.Firstname" autofocus required placeholder="@(Localizer["Firstname"])">
+                </div>
+                <div class="row pt-3">
+                    <input type="text" class="form-control" @bind="Tenant.Middlename" placeholder="@(Localizer["Middlename"])">
+                </div>
+                <div class="row pt-3">
+                    <input type="text" class="form-control" @bind="Tenant.Lastname" required placeholder="@(Localizer["Lastname"])">
+                </div>
+                <div class="row pt-3">
+                    @(Localizer["SupportedLanguages"]):
+                    @foreach (var language in (Languages[])Enum.GetValues(typeof(Languages)))
+                    {
+                        <input type="checkbox" class="form-control" 
+                               @onchange="eventArgs => { LanguageCheckboxClicked(language.ToString(), eventArgs.Value); }" /> @language
+                    }
+                </div>
+                <div class="row pt-3">
+                    @for (int count = 0; count < DomainCounter; count++)
+                    {
+                        <input type="text" class="form-control" required="@(count == 0)" placeholder="@(Localizer["DomainName"])" 
+                               @onchange="eventArgs => { AddDomainUrl(count, (string)eventArgs.Value); }">
+                        <div class="d-flex">
+                            @if (count == (DomainCounter - 1))
+                            {
+                                <button class="btn main-button" @onclick='() => DomainCounter++'>@(Localizer["AddDomain"])</button>
+                            }
+                            @if (count != 0 && count == (DomainCounter - 1))
+                            {
+                                <button class="btn main-button" @onclick='() => DomainCounter--'>@(Localizer["RemoveDomain"])</button>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="row pt-3">
+                    <input type="password" class="form-control" @bind="Tenant.Password" required placeholder="@(Localizer["Password"])">
+                </div>
+                <div class="row pt-3">
+                    <input type="password" class="form-control" @bind="RepeatPassword" required placeholder="@(Localizer["Password"])">
+                </div>
+                <span class="text-danger">@RegistrationMessage</span>
+
+
+                <div class="d-flex justify-content-sm-center pt-3">
+                    <input class="btn main-button" type="submit" value="@(Localizer["Register"])">
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row align-items-center justify-content-center h-100 mw-100">
+        <div class="w-30 mw-30">
+            <div class="row pt-3">
+                @RegistrationMessage
+            </div>
+            <div class="row pt-3">
+                <button class="btn main-button center-block" @onclick='() => NavigationManager.NavigateTo("Login")'>Oke</button>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,77 @@
+﻿@page "/account-settings"
+@layout MainLayout
+@attribute [Authorize]
+
+
+<div class="d-flex flex-wrap justify-content-around">
+    <div class="d-flex w-25 flex-column">
+        <p class="main-font-subheader">@(Localizer["AccountData"])</p>
+        <div class="d-flex flex-column">
+            <div class="d-flex">
+                <p class="main-font pr-3">@(Localizer["Email"]):</p>
+                <p class="line1-1">@(Tenant.Email)</p>
+            </div>
+            <button class="btn main-button" @onclick='() => NavigationManager.NavigateTo("change-password")'>@(Localizer["ChangePassword"])</button>
+        </div>
+        <div class="pt-5">
+            <p class="main-font-subheader">@(Localizer["PersonalData"])</p>
+            <div class="d-flex flex-column">
+                <div class="d-flex">
+                    <p class="main-font pr-3">@(Localizer["Name"]):</p>
+                    <p class="line1-1 pr-2">@(Tenant.Firstname)</p> 
+                    @if(!string.IsNullOrEmpty(Tenant.Middlename)){ <p class="line1-1 pr-2">@(Tenant.Middlename)</p> }
+                    <p class="line1-1">@(Tenant.Lastname)</p>
+                </div>
+                <p class="main-font mb-0">@(Localizer["SupportedLanguages"]):</p>
+                <ul>
+                    @foreach (string language in Tenant.Languages)
+                    {
+                        <li>@language</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex w-50 flex-column">
+        <EditForm Model="@NewDomain" OnValidSubmit="@AddNewDomain">
+            <div class="row">
+                <input type="text" class="form-control" @bind="NewDomain.Url" required placeholder="@(Localizer["Url"])">
+            </div>
+            <div class="row pt-3">
+                <input type="file" class="form-control" placeholder="@(Localizer["DomainLogo"])"
+                        @onchange="eventArgs => { AddDomainLogo(eventArgs.Value); }">
+            </div>
+            <span class="text-danger">@NewDomainErrorMessage</span>
+
+            <div class="d-flex justify-content-sm-center pt-3">
+                <input class="btn main-button" type="submit" value="@(Localizer["AddNewDomain"])">
+            </div>
+        </EditForm>
+
+        <div class="pt-5">
+            <p class="main-font-subheader">@(Localizer["DomainData"])</p>
+            <div class="d-flex flex-column">
+                @foreach (DomainName domain in Tenant.Domains)
+                {
+                    <div class="d-flex pb-4">
+                        <!--TODO Get domain Logo-->
+                        <!--TODO Set DomainName Id-->
+                        <div class="domainlogo-container">
+                            @if (domain.Logo != null)
+                            {
+                                <img class="domainlogo-img" src="images/authentication-logo.png" />
+                            }
+                            else
+                            {
+                                <img class="logo-img" src="images/authentication-logo.png" />
+                            }
+                        </div>
+
+                        <a class="main-font-link pl-5 w-75" href="@domain.Url">@domain.Url</a>
+                        <button class="btn main-button" @onclick='() => NavigationManager.NavigateTo($"domain/update")'>@(Localizer["UpdateDomain"])</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

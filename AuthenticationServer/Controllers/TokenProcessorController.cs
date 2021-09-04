@@ -1,13 +1,12 @@
 ﻿using AuthenticationServer.Common.Interfaces.Services;
 using AuthenticationServer.Web.Middleware.Attributes;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
 namespace AuthenticationServer.Web.Controllers
 {
-    [ServiceFilter(typeof(AuthenticateTenantAttribute))]
-    [Route("api/[controller]")]
+    [ServiceFilter(typeof(AuthenticateAttribute))]
+    [Route("[controller]")]
     [ApiController]
     public class TokenProcessorController : ControllerBase
     {
@@ -22,9 +21,9 @@ namespace AuthenticationServer.Web.Controllers
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("deserialize/{token}")]
-        public JToken DeserialzeToken(string token)
+        [HttpPost]
+        [Route("deserialize")]
+        public JToken DeserialzeToken([FromBody] string token)
         {
             return _tokenProcessService.Deserialize(token);
         }
@@ -34,11 +33,11 @@ namespace AuthenticationServer.Web.Controllers
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("Validate/{token}")]
-        public JToken ValidateToken(string token)
+        [HttpPost]
+        [Route("Validate")]
+        public bool ValidateToken([FromBody] string token)
         {
-            return _tokenProcessService.IsValid(token);
+            return _tokenProcessService.ValidateToken(token);
         }
     }
 }

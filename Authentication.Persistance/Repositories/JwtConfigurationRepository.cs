@@ -41,17 +41,21 @@ namespace Authentication.Persistance.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<JwtConfigurationEntity> GetJWTContainerModel(int currentDomainId)
+        public JwtConfigurationEntity GetTenantJwtContainerModel()
         {
-            throw new NotImplementedException();
+            JwtConfigurationEntity jwtConfigurationEntity = _config.GetSection("TenantJwtConfiguration")
+                                                                .Get<JwtConfigurationEntity>();
+
+            return jwtConfigurationEntity;
         }
+
 
         public Task Insert(JwtConfigurationEntity user)
         {
             string sql = @"insert into dbo.Users (Name, Email)
                             values (@Name, @Email);";
 
-            return _db.SaveData(sql, user);
+            return _db.SaveData<JwtConfigurationEntity, dynamic>(sql, user);
         }
 
         public Task Update(JwtConfigurationEntity jwtConfigurationEntity)

@@ -12,26 +12,27 @@ namespace AuthenticationServer.Domain.Entities
     {
         public LanguageEntity()
         {
-            Tenants = new HashSet<TenantEntity>();
-            Users = new HashSet<UserEntity>();
+            Tenants = new HashSet<ApplicationUserEntity>();
         }
 
         [Key]
+        [Column]
         public Guid Id { get; set; }
 
+        [Column]
         [Required]
         public string Name { get; set; }
 
+        [Column]
         [Required]
         public string Code { get; set; }
 
+        [Column]
         [Required]
         public string RfcCode3066 { get; set; }
 
         [Required]
-        public virtual ICollection<TenantEntity> Tenants { get; set; }
+        public virtual ICollection<ApplicationUserEntity> Tenants { get; set; }
 
-        [Required]
-        public virtual ICollection<UserEntity> Users { get; set; }
     }
 }

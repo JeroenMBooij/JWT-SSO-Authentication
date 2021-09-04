@@ -14,6 +14,6 @@ namespace AuthenticationServer.Common.Interfaces.Domain.Repositories
 
 
         Task CreateJwtConfiguration(JwtConfigurationEntity jwtConfigurationEntity);
-        Task<JwtConfigurationEntity> GetJWTContainerModel(int domainId);
+        JwtConfigurationEntity GetTenantJwtContainerModel();
     }
 }

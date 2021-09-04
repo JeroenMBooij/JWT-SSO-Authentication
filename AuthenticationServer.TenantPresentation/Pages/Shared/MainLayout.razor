@@ -1,0 +1,33 @@
+﻿@inherits LayoutComponentBase
+<div></div>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu SetHeaderEvent="@SetHeaderEvent" />
+    </div>
+
+    <div class="main">
+        <div class="show d-flex justify-content-between">
+            <p class="main-font-header">@CurrentHeader</p>
+            <LanguageComponent />
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2020 - @DateTime.Now.Year Jeroen Booij</p>
+</footer>
+
+
+@code{
+    public string CurrentHeader { get; set; } = "Home";
+
+    public void SetHeaderEvent(string name)
+    {
+        CurrentHeader = name;
+    }
+}

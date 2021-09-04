@@ -10,15 +10,13 @@ namespace AuthenticationServer.Service.Email
 {
     public class EmailService : IEmailService
     {
-        private readonly IUserRepository _userRepository;
         private readonly ITenantRepository _tenantRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
-        public EmailService(IUserRepository userRepository, ITenantRepository tenantRepository, 
-            IMapper mapper, ILogger logger)
+        public EmailService(ITenantRepository tenantRepository, 
+            IMapper mapper, ILogger<EmailService> logger)
         {
-            _userRepository = userRepository;
             _tenantRepository = tenantRepository;
             _mapper = mapper;
             _logger = logger;
@@ -26,10 +24,10 @@ namespace AuthenticationServer.Service.Email
 
         public async Task VerifyTenantEmail(string code)
         {
-            TenantDto tenantDto;
+            AccountDto tenantDto;
             try
             {
-                tenantDto = _mapper.Map<TenantDto>(await _tenantRepository.Get(Guid.Parse(code)));
+                tenantDto = _mapper.Map<AccountDto>(await _tenantRepository.Get(Guid.Parse(code)));
             }
             catch (Exception)
             {

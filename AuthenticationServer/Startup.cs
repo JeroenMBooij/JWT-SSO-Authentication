@@ -1,15 +1,19 @@
 using Authentication.Persistance;
 using AuthenticationServer.Infrastructure;
 using AuthenticationServer.Logic;
+using AuthenticationServer.Logic.Generated;
 using AuthenticationServer.Service;
 using AuthenticationServer.Web.Middleware;
-using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AuthenticationServer.Web
 {
@@ -26,7 +30,7 @@ namespace AuthenticationServer.Web
         {
             #region endpoints
             services.AddMyEndpoints();
-            services.AddMySwagger();
+            services.AddMySwagger(Configuration);
             #endregion
 
             #region Clean Dependency Injection
@@ -36,6 +40,61 @@ namespace AuthenticationServer.Web
             services.AddInfrastructure(Configuration);
             #endregion
 
+            #region Generated Http Clients
+            services.AddHttpClient<IEmailClient, EmailClient>(configuration => configuration.BaseAddress = new Uri(Configuration["BaseUrls:EmailServer"]));
+            #endregion
+
+            #region Authentication
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+            })
+                .AddJwtBearer(jwtBearerOptions =>
+                {
+                    jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = GetSymmetricSecurityKey(),
+
+                        ValidateAudience = false,
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["JwtAuthentication:Issuer"],
+
+                        RequireExpirationTime = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(5)
+                    };
+
+                    jwtBearerOptions.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            string authorization = context.Request.Headers["Authorization"];
+
+                            if (string.IsNullOrEmpty(authorization))
+                            {
+                                context.NoResult();
+                                return Task.CompletedTask;
+                            }
+
+                            context.Token = authorization.Trim();
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+            #endregion
+
+
+        }
+
+        private SecurityKey GetSymmetricSecurityKey()
+        {
+            string secretKey = Configuration["JwtAuthentication:SecretKey"];
+            byte[] symmetricKey = Convert.FromBase64String(secretKey);
+
+            return new SymmetricSecurityKey(symmetricKey);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,13 +102,14 @@ namespace AuthenticationServer.Web
         {
 
             #region routing
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
+
             app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+
             app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
             #endregion
 
             #region configuration
@@ -62,7 +122,6 @@ namespace AuthenticationServer.Web
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 builder.AddUserSecrets<Startup>();
             }
             #endregion
@@ -79,7 +138,6 @@ namespace AuthenticationServer.Web
                 configure.RoutePrefix = string.Empty;
             });
             #endregion
-
 
         }
     }

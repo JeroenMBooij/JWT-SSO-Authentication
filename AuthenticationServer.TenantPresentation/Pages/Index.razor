@@ -1,11 +1,30 @@
 ﻿@page "/"
+    <div class="d-flex justify-content-around flex-wrap h-100">
+        <AuthorizeView>
+            <Authorized>
+                <div class="main-container auth-container d-flex justify-content-center" @onclick="() => NavigateToHome()">
+                    <canvas id="c"></canvas>
+                    <p class="main-font-header coolwhite-hover centered">@(Localizer["Cockpit"])</p>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="d-flex justify-content-center auth-container" @onclick="() => NavigateToLogin()">
+                    <canvas id="c"></canvas>
+                    <p class="main-font-header coolwhite centered">@(Localizer["Auth"])</p>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+        <div class="main-container d-flex justify-content-around flex-wrap">
+            <div class="w-50">
+                <p class="main-font-header">@(Localizer["HowWork"])</p>
+            </div>
+            <div class="w-50">
+                <p class="main-font-header">@(Localizer["Temp"])</p>
+            </div>
+        </div>
+    </div>
 
-<h1>Hello, world!</h1>
-
-<div class="alert alert-warning" role="alert">
-    Before authentication will function correctly, you must configure your provider details in <code>Program.cs</code>
-</div>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+    <div id="script-wrapper">
+        <script src="javascript/neuralnetwork.js" suppress-error="BL9992" id="reloadMe"></script>
+    </div>
+    

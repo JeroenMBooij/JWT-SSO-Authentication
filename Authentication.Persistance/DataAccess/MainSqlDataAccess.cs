@@ -15,7 +15,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
         private readonly IConfiguration _config;
 
 
-        public string Connectionstring { get; set; } = "MainConnection";
+        public string Connectionstring { get; set; } = "MainIdentityConnection";
 
         public MainSqlDataAccess(IConfiguration config)
         {
@@ -68,12 +68,16 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
                         transaction.Rollback();
                         throw new Exception($"saving your changes in the database failed: {ex.Message}");
                     }
+                    finally
+                    {
+                        connection.Close();
+                    }
                 }
 
             }
         }
 
-        public async Task SaveData<T>(string sql, T parameters)
+        public async Task SaveData<T, U>(string sql, U parameters)
         {
             string connectionString = _config.GetConnectionString(Connectionstring);
 
@@ -84,7 +88,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
                 {
                     try
                     {
-                        await connection.ExecuteAsync(sql, parameters);
+                        await connection.ExecuteAsync(sql, parameters, transaction);
 
                         transaction.Commit();
                     }
@@ -92,6 +96,10 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
                     {
                         transaction.Rollback();
                         throw new Exception($"saving your changes in the database failed: {ex.Message}");
+                    }
+                    finally
+                    {
+                        connection.Close();
                     }
                 }
 

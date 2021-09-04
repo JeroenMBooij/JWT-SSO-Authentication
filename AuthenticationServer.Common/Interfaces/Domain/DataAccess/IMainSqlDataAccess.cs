@@ -9,6 +9,6 @@ namespace AuthenticationServer.Common.Interfaces.Domain.DataAccess
         Task<T> GetData<T, U>(string sql, U parameters);
         Task<List<T>> GetAllData<T, U>(string sql, U parameters);
         Task ExecuteStoredProcedures<T>(Dictionary<T, string> parametersToStoredProcedure);
-        Task SaveData<T>(string sql, T parameters);
+        Task SaveData<T, U>(string sql, U parameters);
     }
 }

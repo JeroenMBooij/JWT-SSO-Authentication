@@ -10,16 +10,15 @@ namespace AuthenticationServer.Domain.Entities
     {
 
         [Key]
+        [Column]
         public Guid TenantId { get; set; }
 
+        [Column]
         [Required]
-        public DateTimeOffset Nbf { get; set; }
+        public long ExpireHours { get; set; }
 
         [Required]
-        public DateTimeOffset Exp { get; set; }
-
-        [Required]
-        public virtual TenantEntity Tenant { get; set; }
+        public virtual ApplicationUserEntity Tenant { get; set; }
 
     }
 }

@@ -1,0 +1,8 @@
+﻿
+li::before {
+    color: var(--main-color);
+}
+
+.line1-1 {
+    line-height: 1.1;
+}

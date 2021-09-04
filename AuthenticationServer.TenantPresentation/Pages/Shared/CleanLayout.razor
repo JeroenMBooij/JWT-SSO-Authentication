@@ -1,0 +1,18 @@
+﻿@inherits LayoutComponentBase
+
+    <div class="d-flex justify-content-between">
+        <div class="d-flex">
+            <image src="images/authentication-logo.png" class="logo-img"></image>
+            <a class="main-font-link logo-txt" href="/">Jeroen's Authentication Server</a>
+        </div>
+        <LanguageComponent />
+    </div>
+
+<div class="mw-100">
+    @Body
+</div>
+
+<footer>
+    <hr />
+    <p>&copy; 2020 - @DateTime.Now.Year Jeroen Booij</p>
+</footer>

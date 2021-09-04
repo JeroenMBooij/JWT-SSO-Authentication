@@ -1,6 +1,8 @@
 ﻿using AuthenticationServer.Common.Models.DTOs;
 using AuthenticationServer.Domain.Entities;
 using AutoMapper;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AuthenticationServer.Infrastructure.Mappings
 {
@@ -8,29 +10,26 @@ namespace AuthenticationServer.Infrastructure.Mappings
     {
         public DtoToEntityProfile()
         {
-            CreateMap<TenantEntity, TenantDto>();
-            CreateMap<TenantDto, TenantEntity>();
+            CreateMap<AccountDto, ApplicationUserEntity>()
+                .ForMember(destination => destination.NormalizedEmail,
+                               options => options.MapFrom(source => source.Email.ToUpper()))
+                .ForMember(destination => destination.UserName,
+                               options => options.MapFrom(source => source.Email))
+                .ForMember(destination => destination.Roles,
+                                options => options.MapFrom(source => source.Roles.Select(roleName => new RoleEntity(roleName)) ) );
 
-            CreateMap<DomainEntity, DomainDto>();
-            CreateMap<DomainDto, DomainEntity>();
+            CreateMap<ApplicationUserEntity, AccountDto>()
+                .ForMember(destination => destination.Roles,
+                                options => options.MapFrom(source => source.Roles.Select(s => s.Name)));
 
-            CreateMap<UserEntity, UserDto>();
-            CreateMap<UserDto, UserEntity>();
+            CreateMap<ApplicationEntity, ApplicationDto>();
+            CreateMap<ApplicationDto, ApplicationEntity>();
 
             CreateMap<JwtConfigurationEntity, JwtConfigurationDto>();
             CreateMap<JwtConfigurationDto, JwtConfigurationEntity>();
 
-            CreateMap<RoleEntity, RoleDto>();
-            CreateMap<RoleDto, RoleEntity>();
-
             CreateMap<LanguageEntity, LanguageDto>();
             CreateMap<LanguageDto, LanguageEntity>();
-
-            CreateMap<UserModelEntity, UserModelDto>();
-            CreateMap<UserModelDto, UserModelEntity>();
-
-            CreateMap<UserSchemaEntity, UserSchemaDto>();
-            CreateMap<UserSchemaDto, UserSchemaEntity>();
 
             CreateMap<DashboardEntity, DashboardDto>();
             CreateMap<DashboardDto, DashboardEntity>();

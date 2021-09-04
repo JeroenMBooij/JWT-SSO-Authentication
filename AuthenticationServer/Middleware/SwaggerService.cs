@@ -1,5 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AuthenticationServer.Web.Middleware.Filters.Swagger;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,16 +14,20 @@ namespace AuthenticationServer.Web.Middleware
 {
     public static class SwaggerService
     {
-        public static IServiceCollection AddMySwagger(this IServiceCollection services)
+        public static IServiceCollection AddMySwagger(this IServiceCollection services, IConfiguration config)
         {
             #region Swagger
+            services.TryAddEnumerable(ServiceDescriptor.Transient<IApplicationModelProvider, SwaggerProducesFilter>());
+
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Jiren's Authentication Server",
-                    Description = @"An API to handle all your application authentication and authorization needs.
+                    Title = "Jeroen's Authentication Server",
+                    Description = $@"<a href=""{config["BaseUrls:Dashboard"]}""><h1>Go To Configuration Cockpit</h1></a>
+                                    <br/>
+                                    An API to handle all your application authentication and authorization needs.
                                     By integrating this service you can configure and monitor everything your users do on your applications. 
                                     To start using this service, become a Tenant now!",
                     TermsOfService = new Uri("https://example.com/terms"),
@@ -36,7 +45,34 @@ namespace AuthenticationServer.Web.Middleware
                 });
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 
+                options.ExampleFilters();
+                options.SchemaFilter<SwaggerSchemaFilter>();
 
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Description = "JWT Authorization",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference = new OpenApiReference()
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+
+                /*
+                #region Authentication Schema
                 var securityScheme = new OpenApiSecurityScheme()
                 {
                     In = ParameterLocation.Header,
@@ -46,13 +82,17 @@ namespace AuthenticationServer.Web.Middleware
                 };
                 options.AddSecurityDefinition("Jwt Token", securityScheme);
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-                {
                     {
-                        securityScheme,
-                        new List<string>()
-                    }
-                });
+                        {
+                            securityScheme,
+                            new List<string>()
+                        }
+                    });
+                #endregion*/
+
             });
+
+            services.AddSwaggerExamplesFromAssemblyOf<Startup>();
             #endregion
 
             return services;

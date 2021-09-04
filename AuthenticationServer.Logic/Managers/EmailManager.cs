@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace AuthenticationServer.Logic.Managers
 {
+    //TODO make pretty emails
     public class EmailManager : IEmailManager
     {
         private readonly IEmailClient _emailClient;
@@ -17,6 +18,32 @@ namespace AuthenticationServer.Logic.Managers
             _emailClient = emailClient;
             _config = config;
         }
+
+        public async Task SendRecoverPasswordEmail(string recipient, string passwordRecoverToken)
+        {
+            string subject = "Recover Password";
+            string verificationLink = $@"   <p> Enter your new password: </p>
+                                            <form action=""{_config["BaseUrls:AuthenticationServer"]}TenantAccount/recover-password"" method=""post""
+                                                enctype=""application/x-www-form-urlencoded"">
+                                                    <input type = ""text"" name=""NewPassword"">
+                                                    <input type = ""hidden"" name=""ResetToken"" value=""{passwordRecoverToken}"">
+                                                    <input type = ""hidden"" name=""Email"" value =""{recipient}"">
+                                             
+                                                    <br><br>
+                                                    <input type = ""submit"" value=""Submit"" >
+                                            </ form > ";
+
+            var recipients = new List<string>() { recipient };
+            var message = new Message()
+            {
+                Recipients = recipients,
+                Subject = subject,
+                Content = verificationLink
+            };
+
+            await _emailClient.SendHtmlEmailAsync(message);
+        }
+
         public async Task SendVerificationEmail(string recipient, Guid code)
         {
             string subject = "Verify Email";

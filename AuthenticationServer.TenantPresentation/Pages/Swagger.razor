@@ -1,0 +1,5 @@
+﻿@page "/swagger"
+@layout EmptyLayout
+@attribute [Authorize]
+
+<iframe src="@(Config["BaseUrls:AuthenticationServer"])"></iframe>

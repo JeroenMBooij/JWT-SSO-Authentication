@@ -11,12 +11,14 @@ namespace AuthenticationServer.Domain.Entities
     public class DashboardEntity : AuditableData
     {
         [Key]
+        [Column]
         public Guid TenantId { get; set; }
 
+        [Column]
         [Required]
         public string Model { get; set; }
 
-        public virtual TenantEntity Tenant { get; set; }
+        public virtual ApplicationUserEntity Tenant { get; set; }
 
         //[NotMapped]
         //[Required]

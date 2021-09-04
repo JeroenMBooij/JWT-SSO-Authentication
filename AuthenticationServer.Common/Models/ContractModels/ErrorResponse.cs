@@ -1,4 +1,4 @@
-﻿using AuthenticationServer.Common.Models.ContractModels.Common;
+﻿using AuthenticationServer.Common.Models.ContractModels.Account;
 using System.Collections.Generic;
 
 namespace AuthenticationServer.Common.Models.ContractModels

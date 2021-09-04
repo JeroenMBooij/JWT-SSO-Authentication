@@ -1,4 +1,8 @@
-﻿using FluentValidation.AspNetCore;
+﻿using AuthenticationServer.Web.Middleware.Filters;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AuthenticationServer.Web.Middleware
@@ -7,12 +11,8 @@ namespace AuthenticationServer.Web.Middleware
     {
         public static IServiceCollection AddMyEndpoints(this IServiceCollection services)
         {
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //}).AddCookie();
-
             services.AddControllers();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder =>
@@ -23,9 +23,21 @@ namespace AuthenticationServer.Web.Middleware
                             .Build());
             });
 
-            services.AddMvc()
-                .AddFluentValidation(mvcConfig => mvcConfig.RegisterValidatorsFromAssemblyContaining<Startup>())
-                .AddNewtonsoftJson();
+            services.AddMvc(options => {
+                options.Filters.Add<ValidationFilter>(1);
+                options.Filters.Add<ErrorFilter>();
+                options.Filters.Add(new ConsumesAttribute("application/json"));
+            })
+            .AddFluentValidation(mvcConfig => mvcConfig.RegisterValidatorsFromAssemblyContaining<Startup>())
+            .AddNewtonsoftJson();
+
+            //https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.1#automatic-http-400-responses 
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressConsumesConstraintForFormFileParameters = true;
+                options.SuppressInferBindingSourcesForParameters = true;
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
             #region Controller Attributes
             services.Scan(scan => scan
@@ -35,6 +47,7 @@ namespace AuthenticationServer.Web.Middleware
                 .WithScopedLifetime()
             );
             #endregion
+
 
             return services;
         }
