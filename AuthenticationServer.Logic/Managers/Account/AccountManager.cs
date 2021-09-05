@@ -9,7 +9,12 @@ using AuthenticationServer.Domain.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Logic.Managers.Account
@@ -82,10 +87,19 @@ namespace AuthenticationServer.Logic.Managers.Account
             throw new AuthenticationApiException("Tenant Login", "Invalid email address or password");
         }
 
-        public JwtConfigurationDto CreateTenantJwtConfiguration(AccountDto tenantDto)
+        public JwtConfigurationDto CreateJwtConfiguration(AccountDto accountDto)
         {
             JwtConfigurationDto jwtConfigurationDto = _mapper.Map<JwtConfigurationDto>(_jwtConfigurationRepository.GetTenantJwtContainerModel());
-            jwtConfigurationDto.Claims = tenantDto.Claims;
+
+            List<Claim> claims = jwtConfigurationDto.ConfiguredClaims.Select(claim => claim).ToList();
+            claims.Add(new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now)
+                .AddMinutes(jwtConfigurationDto.ExpireMinutes).ToUnixTimeSeconds().ToString()));
+
+            claims.Add(new Claim("uid", accountDto.Id.ToString()));
+            //claims.Add(new Claim("claims", accountDto.Claims.ToString()));
+
+            jwtConfigurationDto.Claims = claims.ToArray();
 
             return jwtConfigurationDto;
         }

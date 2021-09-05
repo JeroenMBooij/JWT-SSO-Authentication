@@ -43,12 +43,6 @@ namespace AuthenticationServer.Common.Models.DTOs
             {
                 return new List<Claim>()
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Email, Email),
-                    new Claim(ClaimTypes.NameIdentifier, Id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.GivenName, Firstname),
-                    new Claim(JwtRegisteredClaimNames.FamilyName, Lastname),
                     new Claim(ClaimTypes.Role, AuthenticationRole),
                     new Claim("GivenRoles", JsonConvert.SerializeObject(Roles)),
                     new Claim("SupportedLanguages", JsonConvert.SerializeObject(Languages.Select(languageDto => new Language()

@@ -45,7 +45,7 @@ namespace AuthenticationServer.Service.Account
         {
             AccountDto tenantDto = await _accountManager.LoginAsync(credentials.Email, credentials.Password);
 
-            JwtConfigurationDto jwtConfigurationDto = _accountManager.CreateTenantJwtConfiguration(tenantDto);
+            JwtConfigurationDto jwtConfigurationDto = _accountManager.CreateJwtConfiguration(tenantDto);
 
             string token = _jwtManager.GenerateToken(jwtConfigurationDto);
 

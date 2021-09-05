@@ -2,6 +2,7 @@ using Authentication.Persistance;
 using AuthenticationServer.Infrastructure;
 using AuthenticationServer.Logic;
 using AuthenticationServer.Logic.Generated;
+using AuthenticationServer.Logic.Managers;
 using AuthenticationServer.Service;
 using AuthenticationServer.Web.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -45,56 +46,38 @@ namespace AuthenticationServer.Web
             #endregion
 
             #region Authentication
+            var jwtManager = new JwtManager("startup", Configuration);
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Bearer";
                 options.DefaultChallengeScheme = "Bearer";
             })
-                .AddJwtBearer(jwtBearerOptions =>
+            .AddJwtBearer(jwtBearerOptions =>
+            {
+                jwtBearerOptions.TokenValidationParameters = jwtManager.GetTokenValidationParameters();
+
+                jwtBearerOptions.Events = new JwtBearerEvents
                 {
-                    jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
+                    OnMessageReceived = context =>
                     {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = GetSymmetricSecurityKey(),
+                        string authorization = context.Request.Headers["Authorization"];
 
-                        ValidateAudience = false,
-                        ValidateIssuer = true,
-                        ValidIssuer = Configuration["JwtAuthentication:Issuer"],
-
-                        RequireExpirationTime = true,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromMinutes(5)
-                    };
-
-                    jwtBearerOptions.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
+                        if (string.IsNullOrEmpty(authorization))
                         {
-                            string authorization = context.Request.Headers["Authorization"];
-
-                            if (string.IsNullOrEmpty(authorization))
-                            {
-                                context.NoResult();
-                                return Task.CompletedTask;
-                            }
-
-                            context.Token = authorization.Trim();
-
+                            context.NoResult();
                             return Task.CompletedTask;
                         }
-                    };
-                });
+
+                        context.Token = authorization.Trim();
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
             #endregion
 
 
-        }
-
-        private SecurityKey GetSymmetricSecurityKey()
-        {
-            string secretKey = Configuration["JwtAuthentication:SecretKey"];
-            byte[] symmetricKey = Convert.FromBase64String(secretKey);
-
-            return new SymmetricSecurityKey(symmetricKey);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,6 +86,13 @@ namespace AuthenticationServer.Web
 
             #region routing
             //app.UseHttpsRedirection();
+            app.UseCors(options =>
+            {
+                options.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .Build();
+            });
 
             app.UseRouting();
 

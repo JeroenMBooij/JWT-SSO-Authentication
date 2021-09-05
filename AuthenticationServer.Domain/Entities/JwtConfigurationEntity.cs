@@ -15,7 +15,15 @@ namespace AuthenticationServer.Domain.Entities
 
         [Column]
         [Required]
-        public long ExpireHours { get; set; }
+        public string SecurityAlgorithm { get; set; }
+
+        [Column]
+        [Required]
+        public double ExpireMinutes { get; set; }
+
+        [Column]
+        [Required]
+        public string ConfiguredClaims { get; set; }
 
         [Required]
         public virtual ApplicationUserEntity Tenant { get; set; }

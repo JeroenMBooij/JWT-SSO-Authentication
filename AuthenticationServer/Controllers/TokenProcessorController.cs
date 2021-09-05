@@ -23,9 +23,9 @@ namespace AuthenticationServer.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("deserialize")]
-        public JToken DeserialzeToken([FromBody] string token)
+        public string DeserialzeToken([FromBody] string token)
         {
-            return _tokenProcessService.Deserialize(token);
+            return _tokenProcessService.Deserialize(token).ToString();
         }
 
         /// <summary>

@@ -13,15 +13,7 @@ namespace AuthenticationServer.Web.Middleware
         {
             services.AddControllers();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy", builder =>
-                    builder.AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials()
-                            .Build());
-            });
+            services.AddCors();
 
             services.AddMvc(options => {
                 options.Filters.Add<ValidationFilter>(1);

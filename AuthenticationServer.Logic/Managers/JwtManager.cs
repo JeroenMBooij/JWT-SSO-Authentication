@@ -1,7 +1,6 @@
 ﻿using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Models.DTOs;
-using AuthenticationServer.Domain.Entities;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +10,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Logic.Managers
@@ -28,7 +27,11 @@ namespace AuthenticationServer.Logic.Managers
             _accountRepository = accountRepository;
             _mapper = mapper;
         }
-        
+
+        public JwtManager(string startup, IConfiguration config)
+        {
+            _config = config;
+        }
 
         public string GenerateToken(JwtConfigurationDto model)
         {
@@ -39,11 +42,12 @@ namespace AuthenticationServer.Logic.Managers
             {
                 Issuer = _config["JwtAuthentication:Issuer"],
                 Subject = new ClaimsIdentity(model.Claims),
-                Expires = DateTime.Now.AddHours(model.ExpireHours),
-                SigningCredentials = new SigningCredentials(GetSymmetricSecurityKey(), model.SecurityAlgorithm)
+                Expires = DateTime.Now.AddMinutes(model.ExpireMinutes),
+                SigningCredentials = new SigningCredentials(GetAsymmetricSecurityKey(), model.SecurityAlgorithm)
             };
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            jwtSecurityTokenHandler.SetDefaultTimesOnTokenCreation = false;
             SecurityToken securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
 
             string token = jwtSecurityTokenHandler.WriteToken(securityToken);
@@ -128,26 +132,54 @@ namespace AuthenticationServer.Logic.Managers
 
         }
 
-
-        private SecurityKey GetSymmetricSecurityKey()
+        private SecurityKey GetAsymmetricSecurityKey()
         {
-            string secretKey = _config["JwtAuthentication:SecretKey"]; 
-            byte[] symmetricKey = Convert.FromBase64String(secretKey);
+            string secretKey = _config["JwtAuthentication:SecretKey"];
 
-            return new SymmetricSecurityKey(symmetricKey);
+            RSA rsa = RSA.Create();
+            rsa.ImportFromPem(secretKey.ToCharArray());
+
+            var keyparameters = rsa.ExportParameters(true);
+
+            return new RsaSecurityKey(keyparameters);
+
+
+            /* this is a symmetric security key
+            string secretKey = _config["JwtAuthentication:SecretKey"]; 
+            byte[] symmetricKey = Encoding.UTF8.GetBytes(secretKey);
+
+            return new SymmetricSecurityKey(symmetricKey);*/
         }
 
-        private TokenValidationParameters GetTokenValidationParameters()
+        private byte[] GetBytesFromPEM(string pemString, string section)
+        {
+            var header = $"-----BEGIN {section}-----";
+            var footer = $"-----END {section}-----";
+
+            var start = pemString.IndexOf(header, StringComparison.Ordinal);
+            if (start < 0)
+                return null;
+
+            start += header.Length;
+            var end = pemString.IndexOf(footer, start, StringComparison.Ordinal) - start;
+
+            if (end < 0)
+                return null;
+
+            byte[] result = Convert.FromBase64String(pemString.Substring(start, end));
+            return result;
+        }
+
+        public TokenValidationParameters GetTokenValidationParameters()
         {
 
             return new TokenValidationParameters()
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = GetSymmetricSecurityKey(),
+                IssuerSigningKey = GetAsymmetricSecurityKey(),
 
                 ValidateAudience = false,
-                ValidateIssuer = true,
-                ValidIssuer = _config["JwtAuthentication:Issuer"],
+                ValidateIssuer = false,
 
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
@@ -161,7 +193,7 @@ namespace AuthenticationServer.Logic.Managers
             return new TokenValidationParameters()
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = GetSymmetricSecurityKey(),
+                IssuerSigningKey = GetAsymmetricSecurityKey(),
 
                 ValidateAudience = false,
                 ValidateIssuer = true,
