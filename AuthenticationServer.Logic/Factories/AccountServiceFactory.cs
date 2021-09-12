@@ -24,7 +24,7 @@ namespace AuthenticationServer.Logic.Factories
         private readonly IConfiguration _config;
 
 
-        private Dictionary<string, IAccountService> _services;
+        private Dictionary<AccountRole, IAccountService> _services;
 
 
         // TODO look into Mediator for constructor parameters
@@ -61,7 +61,7 @@ namespace AuthenticationServer.Logic.Factories
 
         public IAccountService CreateAccountService(AccountRole accountRole)
         {
-            if (_services.TryGetValue(accountRole.ToString(), out IAccountService accountServiceInstance))
+            if (_services.TryGetValue(accountRole, out IAccountService accountServiceInstance))
                 return accountServiceInstance;
 
             return null;
@@ -78,19 +78,19 @@ namespace AuthenticationServer.Logic.Factories
             return await _applicationRepo.GetAccountRoleFromId(id);
         }
 
-        private Dictionary<string, IAccountService> CreateTypeMap()
+        private Dictionary<AccountRole, IAccountService> CreateTypeMap()
         {
-            Dictionary<string, IAccountService> typeMap = new Dictionary<string, IAccountService>();
+            Dictionary<AccountRole, IAccountService> typeMap = new Dictionary<AccountRole, IAccountService>();
 
             var tenantService = new TenantAccountService(_mapper, _jwtManager, _tenantRepo, _languageRepo,
                 _applicationRepo, _jwtTenantConfigRepo, _emailManager);
 
-            typeMap.Add(AccountRole.Tenant.ToString(), tenantService);
+            typeMap.Add(AccountRole.Tenant, tenantService);
 
             var adminService = new AdminAccountService(_mapper, _applicationAccountRepo, _languageRepo, _applicationRepo,
                 _config, _jwtManager, _emailManager);
 
-            typeMap.Add(AccountRole.Admin.ToString(), adminService);
+            typeMap.Add(AccountRole.Admin, adminService);
 
             return typeMap;
         }
