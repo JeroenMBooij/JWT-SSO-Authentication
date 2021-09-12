@@ -9,6 +9,10 @@ namespace AuthenticationServer.Domain.Entities
     [Table("Applications")]
     public class ApplicationEntity : AuditableData
     {
+        public ApplicationEntity()
+        {
+            JwtTenantConfigurations = new HashSet<JwtTenantConfigEntity>();
+        }
 
         [Key]
         public Guid Id { get; set; }
@@ -19,19 +23,19 @@ namespace AuthenticationServer.Domain.Entities
 
         [Required]
         [Column]
-        public string Url { get; set; }
-
-        [Required]
-        [Column]
         public Guid AdminId { get; set; }
 
         [Column]
         public string LogoLocation { get; set; }
 
-
         [Required]
         public virtual ApplicationUserEntity Admin { get; set; }
 
+        [Required]
+        public virtual ICollection<DomainNameEntity> Domains { get; set; }
+
+        [Required]
+        public virtual ICollection<JwtTenantConfigEntity> JwtTenantConfigurations { get; set; }
 
     }
 }

@@ -16,21 +16,6 @@ namespace Authentication.Persistance.Repositories
             this._db = _db;
         }
 
-        public Task Delete(LanguageEntity tenant)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<LanguageEntity> Get(string Id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<LanguageEntity>> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<LanguageEntity> GetLanguageByName(string languageName)
         {
             var p = new
@@ -45,12 +30,30 @@ namespace Authentication.Persistance.Repositories
             return languageEntity;
         }
 
-        public Task Insert(LanguageEntity tenant)
+
+
+
+        public Task Insert(LanguageEntity entity, string data = "")
         {
             throw new NotImplementedException();
         }
 
-        public Task Update(LanguageEntity tenant)
+        public Task<LanguageEntity> Get(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<LanguageEntity>> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Update(Guid id, LanguageEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Delete(LanguageEntity entity)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Schema;
+using System;
+using System.Collections.Generic;
 
 namespace AuthenticationServer.Common.Models.DTOs
 {
@@ -9,7 +11,7 @@ namespace AuthenticationServer.Common.Models.DTOs
         public Guid Id { get; set; }
         public Guid AdminId { get; set; }
         public string Name { get; set; }
-        public string Url { get; set; }
+        public List<DomainNameDto> Domains { get; set; }
         public LogoDto LogoDto { get; set; }
         public AccountDto Tenant
         {
@@ -23,6 +25,8 @@ namespace AuthenticationServer.Common.Models.DTOs
                 }
             }
         }
+
+        public List<JwtTenantConfigDto> JwtTenantConfigurations { get; set; }
 
 
     }

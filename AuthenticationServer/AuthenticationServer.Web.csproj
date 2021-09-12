@@ -28,7 +28,6 @@
     <ProjectReference Include="..\AuthenticationServer.Common\AuthenticationServer.Common.csproj" />
     <ProjectReference Include="..\AuthenticationServer.Infrastructure\AuthenticationServer.Infrastructure.csproj" />
     <ProjectReference Include="..\AuthenticationServer.Logic\AuthenticationServer.Logic.csproj" />
-    <ProjectReference Include="..\AuthenticationServer.Service\AuthenticationServer.Service.csproj" />
   </ItemGroup>
 
 

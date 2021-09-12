@@ -54,15 +54,14 @@ namespace Authentication.Persistance.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AdminId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Applications");
                 });
@@ -87,6 +86,10 @@ namespace Authentication.Persistance.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ConfigData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -97,25 +100,14 @@ namespace Authentication.Persistance.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Firstname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Middlename")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -159,10 +151,13 @@ namespace Authentication.Persistance.Migrations
                     b.ToTable("ApplicationUsers");
                 });
 
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DashboardEntity", b =>
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DomainNameEntity", b =>
                 {
-                    b.Property<Guid>("TenantId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApplicationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Created")
@@ -171,43 +166,56 @@ namespace Authentication.Persistance.Migrations
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Model")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("TenantId1")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("TenantId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("TenantId1");
+                    b.HasIndex("ApplicationId");
 
-                    b.ToTable("Dashboards");
+                    b.ToTable("DomainName");
                 });
 
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.JwtConfigurationEntity", b =>
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.JwtTenantConfigEntity", b =>
                 {
-                    b.Property<Guid>("TenantId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Algorithm")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ApplicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Claims")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("ExpireHours")
+                    b.Property<long?>("ExpireMinutes")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("TenantId1")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("SecretKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("TenantId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("TenantId1");
+                    b.HasIndex("ApplicationId");
 
-                    b.ToTable("JwtConfigurations");
+                    b.ToTable("JwtTenantConfig");
                 });
 
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.LanguageEntity", b =>
@@ -237,6 +245,24 @@ namespace Authentication.Persistance.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Languages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("8f36b26c-05df-4b9b-ac26-4485c1f3c3f0"),
+                            Code = "nl",
+                            Created = new DateTime(2021, 6, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Nederlands",
+                            RfcCode3066 = "nl-NL"
+                        },
+                        new
+                        {
+                            Id = new Guid("f25f58b9-2f69-488d-b7e0-d77d5214b536"),
+                            Code = "us",
+                            Created = new DateTime(2021, 6, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "English",
+                            RfcCode3066 = "us-US"
+                        });
                 });
 
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.RoleEntity", b =>
@@ -408,22 +434,26 @@ namespace Authentication.Persistance.Migrations
                     b.Navigation("Admin");
                 });
 
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DashboardEntity", b =>
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.DomainNameEntity", b =>
                 {
-                    b.HasOne("AuthenticationServer.Domain.Entities.ApplicationUserEntity", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId1");
+                    b.HasOne("AuthenticationServer.Domain.Entities.ApplicationEntity", "Application")
+                        .WithMany("Domains")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Tenant");
+                    b.Navigation("Application");
                 });
 
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.JwtConfigurationEntity", b =>
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.JwtTenantConfigEntity", b =>
                 {
-                    b.HasOne("AuthenticationServer.Domain.Entities.ApplicationUserEntity", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId1");
+                    b.HasOne("AuthenticationServer.Domain.Entities.ApplicationEntity", "Application")
+                        .WithMany("JwtTenantConfigurations")
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Tenant");
+                    b.Navigation("Application");
                 });
 
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.RoleEntity", b =>
@@ -482,6 +512,13 @@ namespace Authentication.Persistance.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AuthenticationServer.Domain.Entities.ApplicationEntity", b =>
+                {
+                    b.Navigation("Domains");
+
+                    b.Navigation("JwtTenantConfigurations");
                 });
 
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.ApplicationUserEntity", b =>

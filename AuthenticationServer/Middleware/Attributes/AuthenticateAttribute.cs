@@ -16,20 +16,22 @@ namespace AuthenticationServer.Web.Middleware.Attributes
     public class AuthenticateAttribute : ActionFilterAttribute
     {
         private readonly IJwtManager _jwtManager;
-        private readonly ITenantRepository _tenantRepository;
+        private readonly ITenantAccountRepository _tenantRepository;
+        private readonly IAdminAccountRepository _applicationRepository;
 
-        public AuthenticateAttribute(IJwtManager jwtManager, ITenantRepository tenantRepository)
+        public AuthenticateAttribute(IJwtManager jwtManager, ITenantAccountRepository tenantRepository, IAdminAccountRepository applicationRepository)
         {
             _jwtManager = jwtManager;
             _tenantRepository = tenantRepository;
+            _applicationRepository = applicationRepository;
         }
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var tenantToken = filterContext.HttpContext.Request.Cookies["tenant-authorization-token"];
+            var tenantToken = filterContext.HttpContext.Request.Headers["authorization"];
             if (string.IsNullOrEmpty(tenantToken))
             {
                 var errorResponse = new ErrorResponse();
-                errorResponse.Errors.Add(new ErrorModel() { FieldName = "tenant-authorization-token cookie", Message = "Token is empty." });
+                errorResponse.Errors.Add(new ErrorModel() { FieldName = "authorization", Message = "Token is empty." });
 
 
                 filterContext.HttpContext.Response.StatusCode = 401;
@@ -37,17 +39,15 @@ namespace AuthenticationServer.Web.Middleware.Attributes
                 return;
             }
 
-            if (!_jwtManager.IsTokenValid(tenantToken))
+            if (!_jwtManager.IsTokenValid(null, tenantToken))
             {
                 var errorResponse = new ErrorResponse();
-                errorResponse.Errors.Add(new ErrorModel() { FieldName = "tenant-authorization-token cookie", Message = "Token is invalid" });
+                errorResponse.Errors.Add(new ErrorModel() { FieldName = "authorization", Message = "Token is invalid" });
 
                 filterContext.HttpContext.Response.StatusCode = 401;
                 filterContext.Result = new BadRequestObjectResult(errorResponse);
                 return;
             }
-
-            //TODO Validate URL belongs to Tenant
 
             base.OnActionExecuting(filterContext);
         }

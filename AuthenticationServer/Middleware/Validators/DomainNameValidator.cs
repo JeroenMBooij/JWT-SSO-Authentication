@@ -1,18 +1,17 @@
-﻿using AuthenticationServer.Common.Models.ContractModels;
+﻿using AuthenticationServer.Common.Models.ContractModels.Applications;
 using FluentValidation;
 using System;
 
 namespace AuthenticationServer.Web.Middleware.Validators
 {
-    public class DomainNameValidator : AbstractValidator<DomainName>
+    public class DomainNameValidator : AbstractValidator<Application>
     {
         public DomainNameValidator()
         {
-            RuleFor(domain => domain.Url)
-                .Must(url => ValidateUrl(url)).WithMessage("{PropertyValue} is not a valid URL.");
-
-            RuleFor(domain => domain.Logo)
-                .Must(logo => ValidateBase64String(logo)).WithMessage("Invalid Base64 string provided for Logo.");
+            RuleForEach(application => application.Domains)
+               .NotNull().WithMessage("{PropertyName} cannot be empty")
+               .Must(domain => ValidateUrl(domain.Url))
+               .WithMessage("{PropertyValue} is not a valid URL.");
         }
 
         private bool ValidateUrl(string url)
@@ -21,16 +20,5 @@ namespace AuthenticationServer.Web.Middleware.Validators
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
-        private bool ValidateBase64String(string base64Logo)
-        {
-            if (base64Logo != null)
-            {
-                //https://stackoverflow.com/questions/6309379/how-to-check-for-a-valid-base64-encoded-string
-                Span<byte> buffer = new Span<byte>(new byte[base64Logo.Length]);
-                return Convert.TryFromBase64String(base64Logo, buffer, out int _);
-            }
-
-            return true;
-        }
     }
 }

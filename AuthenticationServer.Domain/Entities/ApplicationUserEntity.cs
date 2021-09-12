@@ -15,17 +15,10 @@ namespace AuthenticationServer.Domain.Entities
             Assets = new HashSet<ApplicationEntity>();
             Languages = new HashSet<LanguageEntity>();
         }
-        
+
         [Required]
         [Column]
-        public string Firstname { get; set; }
-
-        [Column]
-        public string Middlename { get; set; }
-
-        [Column]
-        [Required]
-        public string Lastname { get; set; }
+        public string ConfigData { get; set; }
 
         [Column]
         [Required]

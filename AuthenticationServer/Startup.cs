@@ -1,9 +1,10 @@
 using Authentication.Persistance;
+using AuthenticationServer.Common.Enums;
+using AuthenticationServer.Common.Models.DTOs;
 using AuthenticationServer.Infrastructure;
 using AuthenticationServer.Logic;
 using AuthenticationServer.Logic.Generated;
 using AuthenticationServer.Logic.Managers;
-using AuthenticationServer.Service;
 using AuthenticationServer.Web.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -11,9 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Web
@@ -36,7 +35,6 @@ namespace AuthenticationServer.Web
 
             #region Clean Dependency Injection
             services.AddLogic(Configuration);
-            services.AddServices();
             services.AddPersistance(Configuration);
             services.AddInfrastructure(Configuration);
             #endregion
@@ -47,6 +45,12 @@ namespace AuthenticationServer.Web
 
             #region Authentication
             var jwtManager = new JwtManager("startup", Configuration);
+            var jwtconfig = new JwtConfig()
+            {
+                SecretKey = Configuration["JwtAuthentication:SecretKey"],
+                ExpireMinutes = double.Parse(Configuration["JwtAuthentication:ExpireMinutes"]),
+                Algorithm = Enum.Parse<SecurityAlgorithm>(Configuration["JwtAuthentication:Algorithm"])
+            };
 
             services.AddAuthentication(options =>
             {
@@ -55,7 +59,7 @@ namespace AuthenticationServer.Web
             })
             .AddJwtBearer(jwtBearerOptions =>
             {
-                jwtBearerOptions.TokenValidationParameters = jwtManager.GetTokenValidationParameters();
+                jwtBearerOptions.TokenValidationParameters = jwtManager.GetTokenValidationParameters(jwtconfig);
 
                 jwtBearerOptions.Events = new JwtBearerEvents
                 {

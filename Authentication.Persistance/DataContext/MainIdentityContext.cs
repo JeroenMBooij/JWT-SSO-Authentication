@@ -1,4 +1,5 @@
-﻿using AuthenticationServer.Domain.Common;
+﻿using Authentication.Persistance.Seeds;
+using AuthenticationServer.Domain.Common;
 using AuthenticationServer.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -32,6 +33,11 @@ namespace Authentication.Persistance.DataContext
                         .WithOne(x => x.Admin)
                         .HasForeignKey(x => x.AdminId);
 
+            modelBuilder.Entity<ApplicationEntity>()
+                .HasIndex(x => x.Name).IsUnique();
+
+            modelBuilder.LanguageSeed();
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -44,11 +50,11 @@ namespace Authentication.Persistance.DataContext
             return base.SaveChanges();
         }
 
-        public virtual DbSet<DashboardEntity> Dashboards { get; set; }
-        public virtual DbSet<ApplicationEntity> Domains { get; set; }
-        public virtual DbSet<JwtConfigurationEntity> JwtConfigurations { get; set; }
+        public virtual DbSet<ApplicationEntity> Applications { get; set; }
+        public virtual DbSet<DomainNameEntity> Domains { get; set; }
+        public virtual DbSet<JwtTenantConfigEntity> JwtTenantConfigurations { get; set; }
         public virtual DbSet<LanguageEntity> Languages { get; set; }
-        public virtual DbSet<ApplicationUserEntity> Tenants { get; set; }
+        public virtual DbSet<ApplicationUserEntity> ApplicationUsers { get; set; }
 
 
     }

@@ -1,16 +1,16 @@
 ﻿using AuthenticationServer.Common.Models.ContractModels;
-using AuthenticationServer.Common.Models.ContractModels.Account;
+using AuthenticationServer.Common.Models.DTOs;
+using System;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Common.Interfaces.Services
 {
     public interface IAccountService
     {
-        Task<string> RegisterTenantAsync(AccountRegistration tenant, string adminToken);
-        Task<string> LoginTenantAsync(Credentials credentials);
-        bool IsTokenValid(string token);
+        Task<AccountDto> Get(Guid id);
+        Task VerifyEmail(string code);
         Task ChangePassword(NewCredentials newCredentials);
-        Task ResetPassword(string email);
         Task RecoverPassword(ResetPasswordModel resetPasswordModel);
+        Task ResetPassword(string email);
     }
 }

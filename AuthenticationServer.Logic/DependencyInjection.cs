@@ -12,7 +12,7 @@ namespace AuthenticationServer.Logic
 
             services.Scan(scan => scan
                 .FromAssemblyOf<ILogicAssembly>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Manager") || type.Name.EndsWith("Handler") || type.Name.EndsWith("Factory")))
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service") || type.Name.EndsWith("Manager") || type.Name.EndsWith("Factory")))
                 .AsMatchingInterface()
                 .WithScopedLifetime()
             );

@@ -27,7 +27,7 @@ namespace AuthenticationServer.Service.Token
 
         public bool ValidateToken(string token)
         {
-            return _jwtManager.IsTokenValid(token);
+            return _jwtManager.IsTokenValid(null, token);
         }
     }
 }

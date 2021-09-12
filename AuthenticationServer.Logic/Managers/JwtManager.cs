@@ -1,5 +1,8 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain.Repositories;
+﻿using AuthenticationServer.Common.Constants.Token;
+using AuthenticationServer.Common.Enums;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
+using AuthenticationServer.Common.Models.ContractModels;
+using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
@@ -11,21 +14,17 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace AuthenticationServer.Logic.Managers
 {
     public class JwtManager : IJwtManager
     {
         private readonly IConfiguration _config;
-        private readonly ITenantRepository _accountRepository;
-        private readonly IMapper _mapper;
 
-        public JwtManager(IConfiguration config, ITenantRepository accountRepository, IMapper mapper)
+        public JwtManager(IConfiguration config)
         {
             _config = config;
-            _accountRepository = accountRepository;
-            _mapper = mapper;
         }
 
         public JwtManager(string startup, IConfiguration config)
@@ -33,7 +32,7 @@ namespace AuthenticationServer.Logic.Managers
             _config = config;
         }
 
-        public string GenerateToken(JwtConfigurationDto model)
+        public string GenerateToken(JwtModelDto model)
         {
             if (model == null || model.Claims == null || model.Claims.Length == 0)
                 throw new ArgumentException("Arguments to create tokens are not valid");
@@ -42,9 +41,11 @@ namespace AuthenticationServer.Logic.Managers
             {
                 Issuer = _config["JwtAuthentication:Issuer"],
                 Subject = new ClaimsIdentity(model.Claims),
-                Expires = DateTime.Now.AddMinutes(model.ExpireMinutes),
-                SigningCredentials = new SigningCredentials(GetAsymmetricSecurityKey(), model.SecurityAlgorithm)
+                SigningCredentials = new SigningCredentials(GetSecurityKey(model.SecurityAlgorithm, model.SecretKey), model.SecurityAlgorithm.ToString())
             };
+
+            if (model.ExpireMinutes.HasValue)
+                securityTokenDescriptor.Expires = DateTime.Now.AddMinutes(model.ExpireMinutes.Value);
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.SetDefaultTimesOnTokenCreation = false;
@@ -55,30 +56,20 @@ namespace AuthenticationServer.Logic.Managers
             return token;
         }
 
-        private List<Claim> GetAccountClaims(AccountDto account)
-        {
-            return new List<Claim>
-            {
-                new Claim(type: "id", account.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, account.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, account.Email)
-            };
-        }
-
-        public IEnumerable<Claim> GetTenantClaims(AccountDto tenantDto)
-        {
-            var accountClaims = GetAccountClaims(tenantDto);
-
-            return accountClaims;
-        }
-
         public IEnumerable<Claim> GetTokenClaims(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            JwtSecurityToken jwt = handler.ReadJwtToken(token);
+
+            return jwt.Claims;
+        }
+
+        public IEnumerable<Claim> GetTokenClaimsWithValidation(JwtTenantConfigDto jwtTentantConfig, string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw new ArgumentException("Given token is null or empty");
 
-            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters();
+            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters(jwtTentantConfig);
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             try
@@ -88,16 +79,16 @@ namespace AuthenticationServer.Logic.Managers
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new SecurityTokenInvalidTypeException();
             }
         }
 
-        public bool IsTokenValid(string token)
+        public bool IsTokenValid(JwtTenantConfigDto jwtTentantConfig, string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw new ArgumentException("Given token is null or empty.");
 
-            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters();
+            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters(jwtTentantConfig);
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             try
@@ -112,12 +103,12 @@ namespace AuthenticationServer.Logic.Managers
 
         }
 
-        public bool IsTokenSignatureValid(string token)
+        public bool IsTokenSignatureValid(JwtTenantConfigDto jwtTenantConfigDto, string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw new ArgumentException("Given token is null or empty.");
 
-            TokenValidationParameters tokenValidationParameters = GetTokenSignatureValidationParameters();
+            TokenValidationParameters tokenValidationParameters = GetTokenSignatureValidationParameters(jwtTenantConfigDto);
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             try
@@ -132,23 +123,38 @@ namespace AuthenticationServer.Logic.Managers
 
         }
 
-        private SecurityKey GetAsymmetricSecurityKey()
+        public SecurityKey GetSecurityKey(SecurityAlgorithm algorithm, string secretKey)
         {
-            string secretKey = _config["JwtAuthentication:SecretKey"];
+            SecurityDescription securityDescription = SupportedAlgorithms.List.Where(s => s.Name == algorithm).FirstOrDefault();
 
+            switch (securityDescription.Type)
+            {
+                case EncryptionType.Asymmetric:
+                    return GetAsymmetricSecurityKey(secretKey);
+
+                default:
+                    return GetSymmertricSecurityKey(secretKey);
+            }
+        }
+
+        public SecurityKey GetAsymmetricSecurityKey(string secretKey)
+        {
             RSA rsa = RSA.Create();
             rsa.ImportFromPem(secretKey.ToCharArray());
 
             var keyparameters = rsa.ExportParameters(true);
 
-            return new RsaSecurityKey(keyparameters);
+            var key = new RsaSecurityKey(keyparameters);
 
+            return key;
+        }
 
-            /* this is a symmetric security key
-            string secretKey = _config["JwtAuthentication:SecretKey"]; 
+        public SecurityKey GetSymmertricSecurityKey(string secretKey)
+        {
+            // byte[] symmetricKey = Convert.FromBase64String(secretKey);
             byte[] symmetricKey = Encoding.UTF8.GetBytes(secretKey);
 
-            return new SymmetricSecurityKey(symmetricKey);*/
+            return new SymmetricSecurityKey(symmetricKey);
         }
 
         private byte[] GetBytesFromPEM(string pemString, string section)
@@ -170,30 +176,29 @@ namespace AuthenticationServer.Logic.Managers
             return result;
         }
 
-        public TokenValidationParameters GetTokenValidationParameters()
+        public TokenValidationParameters GetTokenValidationParameters(JwtConfig jwtConfig)
         {
 
             return new TokenValidationParameters()
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = GetAsymmetricSecurityKey(),
+                IssuerSigningKey = GetSecurityKey(jwtConfig.Algorithm, jwtConfig.SecretKey),
 
                 ValidateAudience = false,
                 ValidateIssuer = false,
 
-                RequireExpirationTime = true,
-                ValidateLifetime = true,
+                RequireExpirationTime = jwtConfig.ExpireMinutes.HasValue,
+                ValidateLifetime = jwtConfig.ExpireMinutes.HasValue,
                 ClockSkew = TimeSpan.FromMinutes(5)
             };
         }
 
-        private TokenValidationParameters GetTokenSignatureValidationParameters()
+        private TokenValidationParameters GetTokenSignatureValidationParameters(JwtTenantConfigDto jwtTenantConfigDto)
         {
-
-            return new TokenValidationParameters()
+            var tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = GetAsymmetricSecurityKey(),
+                IssuerSigningKey = GetSecurityKey(jwtTenantConfigDto.Algorithm, jwtTenantConfigDto.SecretKey),
 
                 ValidateAudience = false,
                 ValidateIssuer = true,
@@ -201,13 +206,16 @@ namespace AuthenticationServer.Logic.Managers
 
                 ClockSkew = TimeSpan.FromMinutes(5)
             };
+
+            return tokenValidationParameters;
         }
 
         public JToken DeserializeToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = (JwtSecurityToken)handler.ReadToken(token);
-            var claims = jwtSecurityToken.Claims;
+
+            JwtSecurityToken jwtSecurityToken = handler.ReadJwtToken(token);
+            IEnumerable<Claim> claims = jwtSecurityToken.Claims;
 
             var jsonToken = new JObject();
             foreach (var claim in claims)
@@ -216,22 +224,13 @@ namespace AuthenticationServer.Logic.Managers
             return jsonToken;
         }
 
-        public JwtSecurityToken HandleToken(string token)
+        public Guid GetUserId(string token)
         {
-            var handler = new JwtSecurityTokenHandler();
-            return handler.ReadToken(token) as JwtSecurityToken;
+            string userId = GetTokenClaims(token).Where(s => s.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value;
+
+            return Guid.Parse(userId);
         }
 
-        public async Task<AccountDto> GetApplicationUserDto(string token)
-        {
-            string userId = GetUserId(token);
 
-            return _mapper.Map<AccountDto>(await _accountRepository.Get(Guid.Parse(userId)));
-        }
-
-        public string GetUserId(string token)
-        {
-            return GetTokenClaims(token).Where(s => s.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value;
-        }
     }
 }

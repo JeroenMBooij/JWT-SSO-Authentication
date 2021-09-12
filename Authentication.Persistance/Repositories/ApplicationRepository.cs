@@ -1,11 +1,11 @@
-﻿using AuthenticationServer.Common.Constants.StoredProcedures;
-using AuthenticationServer.Common.Extentions;
+﻿using AuthenticationServer.Common.Enums;
 using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Domain.Entities;
-using Dapper;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Authentication.Persistance.Repositories
@@ -14,24 +14,60 @@ namespace Authentication.Persistance.Repositories
     {
         private readonly IMainSqlDataAccess _db;
 
-        public ApplicationRepository(IMainSqlDataAccess db)
+        public ApplicationRepository(IMainSqlDataAccess _db)
         {
-            _db = db;
+            this._db = _db;
         }
 
-        public async Task AddTenantToAdmin(Guid tenantId, string adminId)
+        public async Task<ApplicationEntity> GetApplicationFromName(string name)
         {
-            var parametersToStoredProcedure = new Dictionary<DynamicParameters, string>();
+            string sql = $"SELECT * FROM dbo.Applications where name LIKE @Name";
+            var parameters = new { Name = $"{name}%" };
 
-            var tenantLanguageParameters = new DynamicParameters();
-            tenantLanguageParameters.Add("TenantId", tenantId);
-            tenantLanguageParameters.Add("AdmintId", adminId);
-            parametersToStoredProcedure.Add(tenantLanguageParameters, SPName.AddTenant);
-
-            await _db.ExecuteStoredProcedures(parametersToStoredProcedure);
+            return await _db.GetData<ApplicationEntity, dynamic>(sql, parameters);
         }
 
-        public Task Delete(ApplicationEntity domain)
+        public async Task<ApplicationEntity> GetApplicationFromHostname(string url)
+        {
+            string sql = $"SELECT * FROM dbo.Applications where url LIKE @Url";
+            var parameters = new { Url = $"{url}%" };
+
+            return await _db.GetData<ApplicationEntity, dynamic>(sql, parameters);
+        }
+
+        public async Task<List<ApplicationEntity>> GetApplicationsFromAdminId(Guid adminId)
+        {
+            string sql = $"SELECT * FROM dbo.Applications where AdminId = @AdminId";
+            var parameters = new { AdminId = adminId };
+
+            return await _db.GetData<List<ApplicationEntity>, dynamic>(sql, parameters);
+        }
+
+        public async Task<AccountRole> GetAccountRoleFromEmail(string email)
+        {
+            string sql = $@"SELECT {nameof(ApplicationUserEntity.AuthenticationRole)} 
+                            FROM dbo.Applications where {nameof(ApplicationUserEntity.Email)} = @Email";
+
+            var parameters = new { Email = email };
+
+            var result = await _db.GetData<string, dynamic>(sql, parameters);
+
+            return Enum.Parse<AccountRole>(result);
+        }
+
+        public async Task<AccountRole> GetAccountRoleFromId(Guid id)
+        {
+            string sql = $@"SELECT {nameof(ApplicationUserEntity.AuthenticationRole)} 
+                            FROM dbo.Applications where {nameof(ApplicationUserEntity.Id)} = @Id";
+
+            var parameters = new { Id = id.ToString() };
+
+            var result = await _db.GetData<string, dynamic>(sql, parameters);
+
+            return Enum.Parse<AccountRole>(result);
+        }
+
+        public Task Insert(ApplicationEntity entity, string data = "")
         {
             throw new NotImplementedException();
         }
@@ -46,44 +82,15 @@ namespace Authentication.Persistance.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<ApplicationEntity> GetDomainFromName(string name)
-        {
-            string sql = $"SELECT * FROM dbo.Domains where name LIKE @Name";
-            var parameters = new { Name = $"{name}%" };
-
-            return await _db.GetData<ApplicationEntity, dynamic>(sql, parameters);
-        }
-
-        public async Task<ApplicationEntity> GetDomainFromUrl(string url)
-        {
-            string sql = $"SELECT * FROM dbo.Domains where url LIKE @Url";
-            var parameters = new { Url = $"{url}%" };
-
-            return await _db.GetData<ApplicationEntity, dynamic>(sql, parameters);
-        }
-
-        public async Task<List<ApplicationEntity>> GetDomainsFromAdminId(string adminId)
-        {
-            string sql = $"SELECT * FROM dbo.Domains where AdminId = @AdminId";
-            var parameters = new { AdminId = adminId };
-
-            return await _db.GetData< List<ApplicationEntity>, dynamic>(sql, parameters);
-        }
-
-        public async Task Insert(ApplicationEntity domain)
-        {
-            var parametersToStoredProcedure = new Dictionary<DynamicParameters, string>();
-
-            var tenantLanguageParameters = new DynamicParameters();
-            tenantLanguageParameters.AddParametersFromProperties(domain);
-            parametersToStoredProcedure.Add(tenantLanguageParameters, SPName.InsertApplication);
-
-            await _db.ExecuteStoredProcedures(parametersToStoredProcedure);
-        }
-
-        public Task Update(ApplicationEntity domain)
+        public Task Update(Guid id, ApplicationEntity entity)
         {
             throw new NotImplementedException();
         }
+
+        public Task Delete(ApplicationEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
