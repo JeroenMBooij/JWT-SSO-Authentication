@@ -47,11 +47,11 @@ namespace AuthenticationServer.Web
             var jwtManager = new JwtTokenWorker("startup", Configuration);
             var jwtconfig = new JwtConfig()
             {
-                SecretKey = Configuration["JwtAdminConfig:SecretKey"],
+                SecretKey = Configuration["JWT_SECRETKEY"],
                 ExpireMinutes = double.Parse(Configuration["JwtAdminConfig:ExpireMinutes"]),
                 Algorithm = Enum.Parse<SecurityAlgorithm>(Configuration["JwtAdminConfig:Algorithm"]),
                 ValidateIssuer = true,
-                Issuer = Configuration["JwtAuthentication:Issuer"]
+                Issuer = Configuration["JWT_ISSUER"]
             };
 
             services.AddAuthentication(options =>

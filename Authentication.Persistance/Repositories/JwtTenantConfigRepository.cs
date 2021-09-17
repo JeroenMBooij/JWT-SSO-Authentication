@@ -29,11 +29,6 @@ namespace Authentication.Persistance.Repositories
             string sql = $"SELECT * FROM JwtTenantConfig WHERE applicationId = {applicationId}";
 
             return await _db.GetData<JwtTenantConfigEntity, dynamic>(sql, new { });
-
-            /*JwtTenantConfigEntity jwtConfigurationEntity = _config.GetSection("TenantJwtConfiguration")
-                                                                .Get<JwtTenantConfigEntity>();
-
-            return jwtConfigurationEntity;*/
         }
 
 

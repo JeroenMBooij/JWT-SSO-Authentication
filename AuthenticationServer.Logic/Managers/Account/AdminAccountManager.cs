@@ -83,7 +83,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             model.Claims[1] = new Claim(ClaimTypes.Role, AccountRole.Admin.ToString());
             model.Claims[2] = new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString());
             model.Claims[3] = new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now).AddMinutes(model.ExpireMinutes.Value).ToUnixTimeSeconds().ToString());
-            model.Claims[4] = new Claim(JwtRegisteredClaimNames.Iss, _config["JwtAuthentication:Issuer"]);
+            model.Claims[4] = new Claim(JwtRegisteredClaimNames.Iss, _config["JWT_ISSUER"]);
 
 
             return Task.FromResult(model);

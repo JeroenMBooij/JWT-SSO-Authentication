@@ -38,7 +38,7 @@ namespace AuthenticationServer.Logic.Workers
 
             SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor()
             {
-                Issuer = _config["JwtAuthentication:Issuer"],
+                Issuer = _config["JWT_ISSUER"],
                 Subject = new ClaimsIdentity(model.Claims),
                 SigningCredentials = new SigningCredentials(GetSecurityKey(model.SecurityAlgorithm, model.SecretKey), model.SecurityAlgorithm.ToSchema())
             };

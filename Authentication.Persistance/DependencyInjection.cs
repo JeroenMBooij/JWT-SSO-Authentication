@@ -16,8 +16,7 @@ namespace Authentication.Persistance
         {
             #region Data Access
             services.AddDbContext<MainIdentityContext>(options =>
-                         options.UseSqlServer(
-                             configuration.GetConnectionString("MainIdentityConnection")));
+                         options.UseSqlServer(configuration["IDENTITY_DB_CONNECTION_STRING"]));
 
             services.AddSingleton<IMainSqlDataAccess, MainSqlDataAccess>();
 

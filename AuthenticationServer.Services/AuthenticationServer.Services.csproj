@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Grafana\**" />
+    <EmbeddedResource Remove="Grafana\**" />
+    <None Remove="Grafana\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Authentication.Persistance\Authentication.Persistance.csproj" />
     <ProjectReference Include="..\AuthenticationServer.Common\AuthenticationServer.Common.csproj" />
     <ProjectReference Include="..\AuthenticationServer.Domain\AuthenticationServer.Domain.csproj" />
@@ -18,10 +24,6 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.1-dev-00188" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0-dev-00773" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="8.5.0-alpha0003" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Grafana\" />
   </ItemGroup>
 
 </Project>

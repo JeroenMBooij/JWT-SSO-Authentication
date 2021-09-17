@@ -5,17 +5,34 @@ networks:
     name: localdev
 
 services:
-  main-api:
+  authentication-api:
     build: ./ 
     restart: always
     ports:
       - "7000:80"
     environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      IDENTITY_DB_CONNECTION_STRING: ${IDENTITY_DB_CONNECTION_STRING}
+      JWT_SECRETKEY: ${JWT_SECRETKEY}
+      JWT_ISSUER: ${JWT_ISSUER}
       ASPNETCORE_URLS: "http://+"
     volumes:
-      - /home/jeroen/usersecrets/6b294752-38ff-4b32-a242-41a1b4ac376d:/root/.microsoft/usersecrets/6b294752-38ff-4b32-a242-41a1b4ac376d
+      - /home/server/files:/app/UploadedFiles
     depends_on:
       - db-server
+    networks:
+      - localdev
+
+  email-api:
+    build: ./EmailService/EmailService.Web/ 
+    restart: always
+    ports:
+      - "7001:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      ASPNETCORE_URLS: "http://+"
+      EMAIL_APP_PASSWORD: ${EMAIL_APP_PASSWORD}
+
     networks:
       - localdev
 
@@ -24,7 +41,7 @@ services:
     container_name: db-server
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Jeroen1234
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
       - MSSQL_TCP_PORT=1433
     ports:
       - "1400:1433" 
