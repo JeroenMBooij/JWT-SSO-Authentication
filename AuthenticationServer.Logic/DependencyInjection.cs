@@ -1,7 +1,5 @@
-﻿using AuthenticationServer.Logic.Generated;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace AuthenticationServer.Logic
 {
@@ -12,7 +10,7 @@ namespace AuthenticationServer.Logic
 
             services.Scan(scan => scan
                 .FromAssemblyOf<ILogicAssembly>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service") || type.Name.EndsWith("Manager") || type.Name.EndsWith("Factory")))
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Manager") || type.Name.EndsWith("Worker") || type.Name.EndsWith("Factory")))
                 .AsMatchingInterface()
                 .WithScopedLifetime()
             );

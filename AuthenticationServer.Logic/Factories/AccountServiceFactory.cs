@@ -3,7 +3,7 @@ using AuthenticationServer.Common.Exceptions;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Interfaces.Services;
-using AuthenticationServer.Logic.Services.Account;
+using AuthenticationServer.Logic.Workers.Account;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -15,12 +15,12 @@ namespace AuthenticationServer.Logic.Factories
     public class AccountServiceFactory : IAccountServiceFactory
     {
         private readonly IMapper _mapper;
-        private readonly IJwtManager _jwtManager;
+        private readonly IJwtTokenWorker _jwtManager;
         private readonly ITenantAccountRepository _tenantRepo;
         private readonly IAdminAccountRepository _adminAccountRepo;
         private readonly IApplicationRepository _applicationRepo;
         private readonly IJwtTenantConfigRepository _jwtTenantConfigRepo;
-        private readonly IEmailManager _emailManager;
+        private readonly IEmailService _emailManager;
         private readonly IConfiguration _config;
 
 
@@ -28,9 +28,9 @@ namespace AuthenticationServer.Logic.Factories
 
 
         // TODO look into Mediator for constructor parameters
-        public AccountServiceFactory(IMapper mapper, IJwtManager jwtManager, ITenantAccountRepository tenantRepo, IAdminAccountRepository applicationAccountRepo,
+        public AccountServiceFactory(IMapper mapper, IJwtTokenWorker jwtManager, ITenantAccountRepository tenantRepo, IAdminAccountRepository applicationAccountRepo,
             IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo,
-            IEmailManager emailManager, IConfiguration config)
+            IEmailService emailManager, IConfiguration config)
         {
             _mapper = mapper;
             _jwtManager = jwtManager;
@@ -91,12 +91,12 @@ namespace AuthenticationServer.Logic.Factories
         {
             Dictionary<AccountRole, IAccountService> typeMap = new Dictionary<AccountRole, IAccountService>();
 
-            var tenantService = new TenantAccountService(_mapper, _jwtManager, _tenantRepo,
+            var tenantService = new TenantAccountManager(_mapper, _jwtManager, _tenantRepo,
                 _applicationRepo, _jwtTenantConfigRepo, _emailManager);
 
             typeMap.Add(AccountRole.Tenant, tenantService);
 
-            var adminService = new AdminAccountService(_mapper, _jwtManager, _adminAccountRepo,
+            var adminService = new AdminAccountManager(_mapper, _jwtManager, _adminAccountRepo,
                 _config, _emailManager);
 
             typeMap.Add(AccountRole.Admin, adminService);
