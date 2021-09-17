@@ -46,7 +46,7 @@ namespace AuthenticationServer.Services.Email
         public async Task SendVerificationEmail(string recipient, Guid code)
         {
             string subject = "Verify Email";
-            string verificationLink = $@"<a href='{_config["BaseUrls:AuthenticationServer"]}Email/VerifyEmail/{code}'> Verification Link </a>";
+            string verificationLink = $@"<a href='{_config["BaseUrls:AuthenticationServer"]}/api​/Account​/{code}/VerifyEmail'> Verification Link </a>";
 
             var recipients = new List<string>() { recipient };
             var message = new Message()
