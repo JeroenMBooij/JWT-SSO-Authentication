@@ -1,6 +1,7 @@
 ﻿using AuthenticationServer.Common.Enums;
 using AuthenticationServer.Common.Models.ContractModels;
 using AuthenticationServer.Common.Models.DTOs;
+using AuthenticationServer.Common.Models.DTOs.Account;
 using AuthenticationServer.Domain.Entities;
 using AutoMapper;
 using Newtonsoft.Json;
@@ -18,26 +19,41 @@ namespace AuthenticationServer.Infrastructure.Mappings
     {
         public DtoToEntityProfile()
         {
-           CreateMap<AccountDto, ApplicationUserEntity>()
-                .ForMember(destination => destination.NormalizedEmail,
-                               options => options.MapFrom(source => source.Email.ToUpper()))
-                .ForMember(destination => destination.UserName,
-                               options => options.MapFrom(source => source.Email))
-                .ForMember(destination => destination.Roles,
-                                options => options.MapFrom(source => source.Roles.Select(roleName => new RoleEntity(roleName)) ) )
-                .ForMember(destination => destination.ConfigData,
-                            options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)));
-
-            CreateMap<ApplicationUserEntity, AccountDto>()
+            CreateMap<TenantAccountDto, ApplicationUserEntity>()
+                 .ForMember(destination => destination.NormalizedEmail,
+                                options => options.MapFrom(source => source.Email.ToUpper()))
+                 .ForMember(destination => destination.UserName,
+                                options => options.MapFrom(source => source.Email))
+                 .ForMember(destination => destination.Roles,
+                                 options => options.MapFrom(source => source.Roles.Select(roleName => new RoleEntity(roleName))))
+                 .ForMember(destination => destination.ConfigData,
+                             options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)))
+                 .ForMember(destination => destination.AuthenticationRole,
+                             options => options.MapFrom(source => source.AuthenticationRole.ToString()));
+            CreateMap<ApplicationUserEntity, TenantAccountDto>()
                 .ForMember(destination => destination.Roles,
                                 options => options.MapFrom(source => source.Roles.Select(s => s.Name)))
                 .ForMember(destination => destination.ConfigData,
-                            options => options.MapFrom(source => JObject.Parse(source.ConfigData)));
+                            options => options.MapFrom(source => JObject.Parse(source.ConfigData)))
+                 .ForMember(destination => destination.AuthenticationRole,
+                             options => options.MapFrom(source => Enum.Parse<AccountRole>(source.AuthenticationRole)));
+
+            CreateMap<AdminAccountDto, ApplicationUserEntity>()
+                 .ForMember(destination => destination.NormalizedEmail,
+                                options => options.MapFrom(source => source.Email.ToUpper()))
+                 .ForMember(destination => destination.UserName,
+                                options => options.MapFrom(source => source.Email))
+                 .ForMember(destination => destination.ConfigData,
+                             options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)))
+                 .ForMember(destination => destination.AuthenticationRole,
+                             options => options.MapFrom(source => source.AuthenticationRole.ToString()));
+            CreateMap<ApplicationUserEntity, AdminAccountDto>()
+                .ForMember(destination => destination.ConfigData,
+                            options => options.MapFrom(source => JObject.Parse(source.ConfigData)))
+                 .ForMember(destination => destination.AuthenticationRole,
+                             options => options.MapFrom(source => Enum.Parse<AccountRole>(source.AuthenticationRole)));
 
             CreateMap<ApplicationEntity, ApplicationDto>()
-                .ReverseMap();
-
-            CreateMap<LanguageEntity, LanguageDto>()
                 .ReverseMap();
 
             CreateMap<DomainNameEntity, DomainNameDto>()

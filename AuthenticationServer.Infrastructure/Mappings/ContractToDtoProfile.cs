@@ -1,12 +1,14 @@
-﻿using AuthenticationServer.Common.Models.ContractModels;
+﻿using AuthenticationServer.Common.Enums;
+using AuthenticationServer.Common.Models.ContractModels;
 using AuthenticationServer.Common.Models.ContractModels.Account;
 using AuthenticationServer.Common.Models.ContractModels.Applications;
 using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
+using AuthenticationServer.Common.Models.DTOs.Account;
 using AutoMapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Linq;
+using System;
 
 namespace AuthenticationServer.Infrastructure.Mappings
 {
@@ -14,43 +16,78 @@ namespace AuthenticationServer.Infrastructure.Mappings
     {
         public ContractToDtoProfile()
         {
-            CreateMap<AccountRegistration, AccountDto>()
-                .ForMember(destination => destination.Languages,
-                               options => options.MapFrom(source => source.Languages.Select(languageName => new LanguageDto() { Name = languageName }).ToList()))
+            CreateMap<AccountData, TenantAccountDto>()
                 .ForMember(destination => destination.ConfigData,
                                options => options.MapFrom(source => JObject.Parse(source.ConfigData)));
-            CreateMap<AccountDto, AccountRegistration>()
-                .ForMember(destination => destination.Languages,
-                               options => options.MapFrom(source => source.Languages.Select(s => s.Name).ToList()))
+            CreateMap<TenantAccountDto, AccountData>()
                 .ForMember(destination => destination.ConfigData,
                                options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)));
 
+            CreateMap<AccountRegistration, AdminAccountDto>()
+                .ForMember(destination => destination.ConfigData,
+                               options => options.MapFrom(source => JObject.Parse(source.ConfigData)))
+                .ForMember(destination => destination.AuthenticationRole,
+                                options => options.MapFrom(source => Enum.Parse<AccountRole>(source.AuthenticationRole)));
+            CreateMap<AdminAccountDto, AccountRegistration>()
+                .ForMember(destination => destination.ConfigData,
+                               options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)))
+                .ForMember(destination => destination.AuthenticationRole,
+                                options => options.MapFrom(source => source.AuthenticationRole.ToString()));
 
-            CreateMap<AdminAccount, AccountDto>()
-                .ForMember(destination => destination.Languages,
-                               options => options.MapFrom(source => source.Languages.Select(languageName => new LanguageDto() { Name = languageName }).ToList()))
+            CreateMap<AccountRegistration, TenantAccountDto>()
                 .ForMember(destination => destination.ConfigData,
-                               options => options.MapFrom(source => JObject.Parse(source.ConfigData)));
-            CreateMap<AccountDto, AdminAccount>()
-                .ForMember(destination => destination.Languages,
-                               options => options.MapFrom(source => source.Languages.Select(s => s.Name).ToList()))
+                               options => options.MapFrom(source => JObject.Parse(source.ConfigData)))
+                .ForMember(destination => destination.AuthenticationRole,
+                                options => options.MapFrom(source => Enum.Parse<AccountRole>(source.AuthenticationRole)))
+                .ForMember(destination => destination.AdminId,
+                                options => options.MapFrom(source => Guid.Parse(source.AdminId)));
+            CreateMap<TenantAccountDto, AccountRegistration>()
                 .ForMember(destination => destination.ConfigData,
-                               options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)));
+                               options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)))
+                .ForMember(destination => destination.AuthenticationRole,
+                                options => options.MapFrom(source => source.AuthenticationRole.ToString()))
+                .ForMember(destination => destination.AdminId,
+                                options => options.MapFrom(source => source.AdminId.ToString()));
+
+
+
+            CreateMap<AccountWithId, TenantAccountDto>()
+                .ForMember(destination => destination.ConfigData,
+                               options => options.MapFrom(source => JObject.Parse(source.ConfigData)))
+                .ForMember(destination => destination.Id,
+                                options => options.MapFrom(source => Guid.Parse(source.Id)));
+            CreateMap<TenantAccountDto, AccountWithId>()
+                .ForMember(destination => destination.ConfigData,
+                               options => options.MapFrom(source => JsonConvert.SerializeObject(source.ConfigData)))
+                .ForMember(destination => destination.Id,
+                                options => options.MapFrom(source => source.Id.ToString()));
 
 
             CreateMap<Application, ApplicationDto>()
-                .ForMember(destination => destination.LogoDto,
-                            options => options.MapFrom(source => new LogoDto() { Base64 = source.Logo }));
+                .ForMember(destination => destination.IconUUID,
+                                options => options.MapFrom(source => Guid.Parse(source.IconUUID)))
+                .ForAllMembers(opt => opt.Condition((source, dest, sourceMember, destMember) => (sourceMember != null)));
+            CreateMap<ApplicationDto, Application>()
+                .ForMember(destination => destination.IconUUID,
+                                options => options.MapFrom(source => source.IconUUID.ToString()));
 
-            CreateMap<ApplicationDto, Application>();
-            CreateMap<ApplicationDto, ApplicationWithId>()
-                .ReverseMap();
+            CreateMap<ApplicationWithId, ApplicationDto>()
+                .ForMember(destination => destination.Id,
+                                options => options.MapFrom(source => Guid.Parse(source.Id)))
+                .ForMember(destination => destination.IconUUID,
+                                options => options.MapFrom(source => Guid.Parse(source.IconUUID)));
 
             CreateMap<JwtTenantConfig, JwtTenantConfigDto>()
-                .ReverseMap();
+                .ForMember(destination => destination.Algorithm,
+                            options => options.MapFrom(source => Enum.Parse<SecurityAlgorithm>(source.Algorithm)))
+                .ForAllMembers(opt => opt.Condition((source, dest, sourceMember, destMember) => (sourceMember != null)));
+            CreateMap<JwtTenantConfigDto, JwtTenantConfig>()
+                .ForMember(destination => destination.Algorithm,
+                            options => options.MapFrom(source => source.Algorithm.ToString()));
 
             CreateMap<DomainName, DomainNameDto>()
-                .ReverseMap();
+                .ForAllMembers(opt => opt.Condition((source, dest, sourceMember, destMember) => (sourceMember != null)));
+            CreateMap<DomainNameDto, DomainName>();
 
 
             CreateMap<Role, RoleDto>()

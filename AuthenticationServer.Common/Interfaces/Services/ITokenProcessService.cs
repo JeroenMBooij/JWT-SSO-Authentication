@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AuthenticationServer.Common.Models.ContractModels.Token;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace AuthenticationServer.Common.Interfaces.Services
 {
     public interface ITokenProcessService
     {
-        JToken Deserialize(string token);
-        bool ValidateToken(string token);
+        Task<JToken> Deserialize(string token);
+        Task<bool> ValidateToken(string token);
+        Task<Ticket> RefreshToken(Ticket ticket);
     }
 }

@@ -17,4 +17,9 @@
     <ProjectReference Include="..\AuthenticationServer.Domain\AuthenticationServer.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seeds\" />
+    <Folder Include="UploadedFiles\" />
+  </ItemGroup>
+
 </Project>

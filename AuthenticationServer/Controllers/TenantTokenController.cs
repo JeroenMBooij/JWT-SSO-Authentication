@@ -1,12 +1,14 @@
-﻿using AuthenticationServer.Common.Interfaces.Services;
-using AuthenticationServer.Web.Middleware.Attributes;
+﻿using AuthenticationServer.Common.Constants.Token;
+using AuthenticationServer.Common.Interfaces.Services;
+using AuthenticationServer.Common.Models.ContractModels.Token;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AuthenticationServer.Web.Controllers
 {
-    [ServiceFilter(typeof(AuthenticateAttribute))]
-    [Route("[controller]")]
+    [Route("api/tenant/token", Name = "Token Processor")]
     [ApiController]
     public class TenantTokenController : ControllerBase
     {
@@ -16,16 +18,40 @@ namespace AuthenticationServer.Web.Controllers
         {
             _tokenProcessService = tokenProcessService;
         }
+
+
+        /// <param name="type">filter by algorithm type (autocompleted)</param>
+        [HttpGet("algorithms")]
+        public dynamic GetSecurityDescriptions(string type = "")
+        {
+            var algorithms = SupportedAlgorithms.List.Select(s => (dynamic)new
+            {
+                Name = s.Name.ToString(),
+                Schema = s.Schema,
+                Type = s.Type.ToString()
+            }).ToList();
+
+            if (string.IsNullOrEmpty(type) == false)
+                algorithms = algorithms.Where(s => s.Type.StartsWith(type, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+            return new
+            {
+                Total = algorithms.Count,
+                items = algorithms
+            };
+        }
+
+
+
         /// <summary>
         /// Give me your token
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpPost]
-        [Route("deserialize")]
-        public string DeserialzeToken([FromBody] string token)
+        [HttpPost("deserialize")]
+        public async Task<string> DeserialzeToken([FromBody] string token)
         {
-            return _tokenProcessService.Deserialize(token).ToString();
+            return (await _tokenProcessService.Deserialize(token)).ToString();
         }
 
         /// <summary>
@@ -33,11 +59,21 @@ namespace AuthenticationServer.Web.Controllers
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpPost]
-        [Route("Validate")]
-        public bool ValidateToken([FromBody] string token)
+        [HttpPost("validate")]
+        public async Task<bool> ValidateToken([FromBody] string token)
         {
-            return _tokenProcessService.ValidateToken(token);
+            return await _tokenProcessService.ValidateToken(token);
+        }
+
+        /// <summary>
+        /// Give me your ticket
+        /// </summary>
+        /// <param name="ticket"></param>
+        /// <returns></returns>
+        [HttpPost("refresh")]
+        public async Task<Ticket> RefreshToken([FromBody] Ticket ticket)
+        {
+            return await _tokenProcessService.RefreshToken(ticket);
         }
     }
 }

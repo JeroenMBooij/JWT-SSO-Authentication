@@ -1,12 +1,11 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain.Repositories;
-using AuthenticationServer.Common.Models.ContractModels.Account;
+﻿using AuthenticationServer.Common.Models.ContractModels.Account;
 
 namespace AuthenticationServer.Web.Middleware.Validators
 {
-    public class TenantValidator : AccountValidator<AccountRegistration>
+    public class TenantValidator : AccountValidator<AccountData>
     {
-        public TenantValidator(ILanguageRepository languageRepository)
-            : base(languageRepository)
+        public TenantValidator()
+            : base()
         {
 
         }

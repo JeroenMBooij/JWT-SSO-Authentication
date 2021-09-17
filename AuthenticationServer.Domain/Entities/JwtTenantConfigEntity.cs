@@ -28,8 +28,15 @@ namespace AuthenticationServer.Domain.Entities
         public long? ExpireMinutes { get; set; }
 
         [Column]
+        public long? RefreshExpireMinutes { get; set; }
+
+        [Column]
         [Required]
         public string Algorithm { get; set; }
+
+        [Column]
+        [Required]
+        public Guid ApplicationId { get; set; }
 
         [Required]
         public virtual ApplicationEntity Application { get; set; }

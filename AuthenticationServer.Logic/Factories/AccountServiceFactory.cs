@@ -1,4 +1,5 @@
 ﻿using AuthenticationServer.Common.Enums;
+using AuthenticationServer.Common.Exceptions;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Interfaces.Services;
@@ -16,8 +17,7 @@ namespace AuthenticationServer.Logic.Factories
         private readonly IMapper _mapper;
         private readonly IJwtManager _jwtManager;
         private readonly ITenantAccountRepository _tenantRepo;
-        private readonly IAdminAccountRepository _applicationAccountRepo;
-        private readonly ILanguageRepository _languageRepo;
+        private readonly IAdminAccountRepository _adminAccountRepo;
         private readonly IApplicationRepository _applicationRepo;
         private readonly IJwtTenantConfigRepository _jwtTenantConfigRepo;
         private readonly IEmailManager _emailManager;
@@ -29,14 +29,13 @@ namespace AuthenticationServer.Logic.Factories
 
         // TODO look into Mediator for constructor parameters
         public AccountServiceFactory(IMapper mapper, IJwtManager jwtManager, ITenantAccountRepository tenantRepo, IAdminAccountRepository applicationAccountRepo,
-            ILanguageRepository languageRepo, IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo,
+            IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo,
             IEmailManager emailManager, IConfiguration config)
         {
             _mapper = mapper;
             _jwtManager = jwtManager;
             _tenantRepo = tenantRepo;
-            _applicationAccountRepo = applicationAccountRepo;
-            _languageRepo = languageRepo;
+            _adminAccountRepo = applicationAccountRepo;
             _applicationRepo = applicationRepo;
             _jwtTenantConfigRepo = jwtTenantConfigRepo;
             _emailManager = emailManager;
@@ -70,25 +69,35 @@ namespace AuthenticationServer.Logic.Factories
 
         public async Task<AccountRole> IdentifyAccount(string email)
         {
-            return await _applicationRepo.GetAccountRoleFromEmail(email);
+            AccountRole? accountRole = await _applicationRepo.GetAccountRole(email);
+
+            if (accountRole == null)
+                throw new AuthenticationApiException("login", "Invalid Credentials provided");
+
+            return accountRole.Value;
         }
 
         public async Task<AccountRole> IdentifyAccount(Guid id)
         {
-            return await _applicationRepo.GetAccountRoleFromId(id);
+            AccountRole? accountRole = await _applicationRepo.GetAccountRole(id);
+
+            if (accountRole == null)
+                throw new AuthenticationApiException("verify", "Invalid AccountId provided");
+
+            return accountRole.Value;
         }
 
         private Dictionary<AccountRole, IAccountService> CreateTypeMap()
         {
             Dictionary<AccountRole, IAccountService> typeMap = new Dictionary<AccountRole, IAccountService>();
 
-            var tenantService = new TenantAccountService(_mapper, _jwtManager, _tenantRepo, _languageRepo,
+            var tenantService = new TenantAccountService(_mapper, _jwtManager, _tenantRepo,
                 _applicationRepo, _jwtTenantConfigRepo, _emailManager);
 
             typeMap.Add(AccountRole.Tenant, tenantService);
 
-            var adminService = new AdminAccountService(_mapper, _applicationAccountRepo, _languageRepo, _applicationRepo,
-                _config, _jwtManager, _emailManager);
+            var adminService = new AdminAccountService(_mapper, _jwtManager, _adminAccountRepo,
+                _config, _emailManager);
 
             typeMap.Add(AccountRole.Admin, adminService);
 

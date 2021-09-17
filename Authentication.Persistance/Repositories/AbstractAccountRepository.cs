@@ -3,6 +3,7 @@ using AuthenticationServer.Common.Exceptions;
 using AuthenticationServer.Common.Extentions;
 using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
+using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Domain.Entities;
 using Dapper;
 using Microsoft.AspNetCore.Identity;
@@ -41,6 +42,13 @@ namespace Authentication.Persistance.Repositories
             return applicationUserEntity;
         }
 
+        public async Task<Guid?> GetAdminIdByEmail(string email)
+        {
+            ApplicationUserEntity applicationUserEntity = await GetAccountByEmail(email);
+
+            return applicationUserEntity.AdminId;
+        }
+
         public async Task AddRoleToAccount(ApplicationUserEntity account, string role)
         {
             await _tenantAccountManager.AddToRoleAsync(account, role);
@@ -56,8 +64,58 @@ namespace Authentication.Persistance.Repositories
             return await _signInManager.PasswordSignInAsync(tenantEntity, password, false, true);
         }
 
+        public async Task RegisterTicket(Guid userId, Ticket ticket)
+        {
+            string sql = $@"UPDATE dbo.ApplicationUsers 
+                            SET {nameof(ApplicationUserEntity.RegisteredJWT)} = @Jwt,
+                                {nameof(ApplicationUserEntity.RegisteredRefreshToken)} = @RefreshToken,
+                                {nameof(ApplicationUserEntity.JwtIssuedAt)} = @issuedAt
+                            WHERE Id = @Id";
 
-        public virtual async Task Insert(ApplicationUserEntity tenantEntity, string password = "")
+            var parameters = new
+            {
+                Id = userId,
+                Jwt = ticket.RegisteredJWT,
+                RefreshToken = ticket.RegisteredRefreshToken,
+                IssuedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            };
+
+            await _db.SaveData<dynamic>(sql, parameters);
+        }
+
+        public async Task RegisterJWT(Guid accountId, Guid? applicationId, string registeredJWT)
+        {
+            string sql = $@"UPDATE dbo.ApplicationUsers 
+                            SET {nameof(ApplicationUserEntity.RegisteredJWT)} = @Jwt,
+                                {nameof(ApplicationUserEntity.RegisteredApplication)} = @ApplicationId,
+                                {nameof(ApplicationUserEntity.JwtIssuedAt)} = @issuedAt
+                            WHERE Id = @Id";
+
+            var parameters = new
+            {
+                Id = accountId,
+                Jwt = registeredJWT,
+                ApplicationId = applicationId,
+                IssuedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            };
+
+            await _db.SaveData<dynamic>(sql, parameters);
+        }
+
+        public async Task<Ticket> GetTicket(Guid userId) 
+        {
+            string sql = $@"SELECT {nameof(ApplicationUserEntity.RegisteredJWT)},
+                                   {nameof(ApplicationUserEntity.RegisteredRefreshToken)},
+                                   {nameof(ApplicationUserEntity.JwtIssuedAt)}
+                            FROM dbo.ApplicationUsers
+                            WHERE Id = @Id";
+
+            var parameters = new { Id = userId };
+
+            return await _db.GetData<Ticket, dynamic>(sql, parameters);
+        }
+
+        public virtual async Task<Guid> Insert(ApplicationUserEntity tenantEntity, string password = "")
         {
             try
             {
@@ -66,23 +124,22 @@ namespace Authentication.Persistance.Repositories
             }
             catch (AuthenticationApiException) { }
             if (string.IsNullOrEmpty(password))
-                throw new ArgumentException("password is required");
-
-            var parametersToStoredProcedure = new Dictionary<DynamicParameters, string>();
-            AddLanguageToAccount(parametersToStoredProcedure, tenantEntity.Id, tenantEntity.Languages.ToList());
-            tenantEntity.Languages.Clear();
+                throw new ArgumentException("password is required");;
 
             IdentityResult result = await _tenantAccountManager.CreateAsync(tenantEntity, password);
 
-            if (result.Succeeded)
-                await _db.ExecuteStoredProcedures(parametersToStoredProcedure);
-            else
+            if (result.Succeeded == false)
                 throw new AuthenticationApiException(result.Errors.ToErrorModel());
+
+            return tenantEntity.Id;
         }
 
-        public virtual async Task<ApplicationUserEntity> Get(Guid id)
+        public virtual async Task<ApplicationUserEntity> Get(Guid? adminId, Guid id)
         {
-            string sql = $"SELECT * FROM dbo.ApplicationUsers where Id = @Id";
+            string sql = $@"SELECT * 
+                            FROM dbo.ApplicationUsers 
+                            WHERE Id = @Id";
+
             var parameters = new { Id = id.ToString() };
 
             return await _db.GetData<ApplicationUserEntity, dynamic>(sql, parameters);
@@ -94,7 +151,7 @@ namespace Authentication.Persistance.Repositories
             string sql = $"UPDATE dbo.ApplicationUsers SET EmailConfirmed = '1' where Id = @Id";
             var parameters = new { Id = id.ToString() };
 
-            await _db.SaveData<ApplicationUserEntity, dynamic>(sql, parameters);
+            await _db.SaveData<object>(sql, parameters);
         }
         public async Task<DateTimeOffset?> GetLockoutTime(string email)
         {
@@ -128,38 +185,21 @@ namespace Authentication.Persistance.Repositories
             return result;
         }
 
-        public virtual Task<List<ApplicationUserEntity>> GetAll()
+        public virtual Task<List<ApplicationUserEntity>> GetAll(Guid adminId)
         {
             throw new System.NotImplementedException();
         }
 
-        public virtual Task Update(Guid id, ApplicationUserEntity entity)
+        public virtual Task Update(Guid adminId, Guid id, ApplicationUserEntity entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual Task Delete(ApplicationUserEntity tenantEntity)
+        public virtual Task Delete(Guid adminId, Guid id)
         {
             throw new System.NotImplementedException();
         }
 
-
-
-
-
-
-
-        private void AddLanguageToAccount(Dictionary<DynamicParameters, string> parametersToStoredProcedure, Guid accountId, List<LanguageEntity> languages)
-        {
-            foreach (LanguageEntity languageEntity in languages)
-            {
-                var tenantLanguageParameters = new DynamicParameters();
-                tenantLanguageParameters.Add("LanguageId", languageEntity.Id);
-                tenantLanguageParameters.Add("UserId", accountId);
-
-                parametersToStoredProcedure.Add(tenantLanguageParameters, SPName.InsertAccountLanguage);
-            }
-        }
 
     }
 }

@@ -1,10 +1,9 @@
 ﻿using AuthenticationServer.Common.Constants.Token;
 using AuthenticationServer.Common.Enums;
+using AuthenticationServer.Common.Extentions;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Models.ContractModels;
-using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
-using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
@@ -41,7 +40,7 @@ namespace AuthenticationServer.Logic.Managers
             {
                 Issuer = _config["JwtAuthentication:Issuer"],
                 Subject = new ClaimsIdentity(model.Claims),
-                SigningCredentials = new SigningCredentials(GetSecurityKey(model.SecurityAlgorithm, model.SecretKey), model.SecurityAlgorithm.ToString())
+                SigningCredentials = new SigningCredentials(GetSecurityKey(model.SecurityAlgorithm, model.SecretKey), model.SecurityAlgorithm.ToSchema())
             };
 
             if (model.ExpireMinutes.HasValue)
@@ -201,11 +200,13 @@ namespace AuthenticationServer.Logic.Managers
                 IssuerSigningKey = GetSecurityKey(jwtTenantConfigDto.Algorithm, jwtTenantConfigDto.SecretKey),
 
                 ValidateAudience = false,
-                ValidateIssuer = true,
-                ValidIssuer = _config["JwtAuthentication:Issuer"],
+                ValidateIssuer = jwtTenantConfigDto.ValidateIssuer,
 
                 ClockSkew = TimeSpan.FromMinutes(5)
             };
+
+            if (jwtTenantConfigDto.ValidateIssuer)
+                tokenValidationParameters.ValidIssuer = jwtTenantConfigDto.Issuer;
 
             return tokenValidationParameters;
         }
@@ -226,7 +227,7 @@ namespace AuthenticationServer.Logic.Managers
 
         public Guid GetUserId(string token)
         {
-            string userId = GetTokenClaims(token).Where(s => s.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value;
+            string userId = GetTokenClaims(token).Where(s => s.Type == "uid").FirstOrDefault().Value;
 
             return Guid.Parse(userId);
         }

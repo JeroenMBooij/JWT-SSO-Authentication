@@ -1,19 +1,18 @@
-﻿using Newtonsoft.Json.Schema;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AuthenticationServer.Common.Models.DTOs
 {
     public class ApplicationDto
     {
-        private AccountDto _tenant;
+        private AbstractAccountDto _tenant;
 
         public Guid Id { get; set; }
         public Guid AdminId { get; set; }
         public string Name { get; set; }
         public List<DomainNameDto> Domains { get; set; }
-        public LogoDto LogoDto { get; set; }
-        public AccountDto Tenant
+        public Guid? IconUUID { get; set; }
+        public AbstractAccountDto Tenant
         {
             get => _tenant;
             set

@@ -1,6 +1,8 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
+﻿using AuthenticationServer.Common.Extentions;
+using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Domain.Entities;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -35,33 +37,49 @@ namespace Authentication.Persistance.Repositories
         }
 
 
-        public Task Insert(JwtTenantConfigEntity entity, string data = "")
+        public async Task<Guid> Insert(JwtTenantConfigEntity JwtTenantConfigEntity, string data = "")
         {
+            string sql = $@"INSERT INTO dbo.{typeof(JwtTenantConfigEntity).GetTableName()}
+                            VALUES (@JwtTenantConfigId, @SecretKey, @Claims, @ExpireMinutes, @Algorithm, @ApplicationId, @Created, @LastModified);";
 
-            string sql = @"insert into dbo.Users (Name, Email)
-                            values (@Name, @Email);";
+            var parameters = new DynamicParameters();
+            parameters.AddColumnParameters(JwtTenantConfigEntity, null);
 
-            return _db.SaveData<JwtTenantConfigEntity, dynamic>(sql, entity);
+            await _db.SaveData(sql, parameters);
+
+            return JwtTenantConfigEntity.Id;
         }
 
-        public async Task<JwtTenantConfigEntity> Get(Guid id)
+        public async Task<JwtTenantConfigEntity> Get(Guid? adminId, Guid id)
         {
-            string sql = $"SELECT * FROM JwtTenantConfig WHERE id = {id}";
+            string sql = $"SELECT * FROM JwtTenantConfig WHERE id = @Id";
 
-            return await _db.GetData<JwtTenantConfigEntity, dynamic>(sql, new { });
+            return await _db.GetData<JwtTenantConfigEntity, object>(sql, new { Id = id });
         }
 
-        public Task<List<JwtTenantConfigEntity>> GetAll()
+        public Task<List<JwtTenantConfigEntity>> GetAll(Guid adminId)
         {
             throw new NotImplementedException();
         }
 
-        public Task Update(Guid id, JwtTenantConfigEntity entity)
+        public async Task Update(Guid adminId, Guid id, JwtTenantConfigEntity jwtTenantConfigEntity)
         {
-            throw new NotImplementedException();
+            string sql = $@"UPDATE dbo.{typeof(JwtTenantConfigEntity).GetTableName()}
+                            SET 
+                                {nameof(jwtTenantConfigEntity.SecretKey)} = @SecretKey,
+                                {nameof(jwtTenantConfigEntity.Claims)} = @Claims,
+                                {nameof(jwtTenantConfigEntity.ExpireMinutes)} = @ExpireMinutes
+                                {nameof(jwtTenantConfigEntity.Algorithm)} = @Algorithm
+                                {nameof(jwtTenantConfigEntity.LastModified)} = @LastModified
+                            WHERE {nameof(jwtTenantConfigEntity.Id)} = @Id;";
+
+            var parameters = new DynamicParameters();
+            parameters.AddColumnParameters(jwtTenantConfigEntity, nameof(jwtTenantConfigEntity.Created));
+
+            await _db.SaveData(sql, parameters);
         }
 
-        public Task Delete(JwtTenantConfigEntity jwtConfigurationEntity)
+        public Task Delete(Guid adminId, Guid id)
         {
             throw new NotImplementedException();
         }

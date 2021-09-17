@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace AuthenticationServer.Common.Interfaces.Domain.Repositories
 {
-    public interface IApplicationRepository: IRepository<ApplicationEntity>
+    public interface IApplicationRepository: ICRUDRepository<ApplicationEntity>
     {
-        Task<AccountRole> GetAccountRoleFromEmail(string email);
         Task<ApplicationEntity> GetApplicationFromHostname(string url);
         Task<ApplicationEntity> GetApplicationFromName(string name);
         Task<List<ApplicationEntity>> GetApplicationsFromAdminId(Guid adminId);
-        Task<AccountRole> GetAccountRoleFromId(Guid id);
+        Task<AccountRole?> GetAccountRole(Guid id);
+        Task<AccountRole?> GetAccountRole(string email);
+        Task<Guid> GetApplicationIconUUID(Guid applicationId);
     }
 }

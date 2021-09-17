@@ -3,11 +3,10 @@ using AuthenticationServer.Common.Extentions;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Models.ContractModels;
+using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
-using AuthenticationServer.Domain.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
@@ -17,23 +16,22 @@ namespace AuthenticationServer.Logic.Services.Account
     {
         protected readonly IEmailManager _emailManager;
         protected readonly IAccountRepository _accountRepository;
-        private readonly ILanguageRepository _languageRepository;
         protected readonly IMapper _mapper;
+        protected readonly IJwtManager _jwtManager;
 
-        public AbstractAccountService(IMapper mapper, IEmailManager emailManager, IAccountRepository accountRepository,
-            ILanguageRepository languageRepository)
+        public AbstractAccountService(IMapper mapper, IJwtManager jwtManager, IEmailManager emailManager, IAccountRepository accountRepository)
         {
             _emailManager = emailManager;
             _accountRepository = accountRepository;
-            _languageRepository = languageRepository;
             _mapper = mapper;
+            _jwtManager = jwtManager;
         }
 
-        public async Task<AccountDto> LoginAsync(string email, string password)
+        public async Task<T> LoginAsync<T>(string email, string password) where T : AbstractAccountDto
         {
-            AccountDto tenantDto = _mapper.Map<AccountDto>(await _accountRepository.GetAccountByEmail(email));
+            T tenantDto = _mapper.Map<T>(await _accountRepository.GetAccountByEmail(email));
             if (tenantDto == null)
-                throw new AuthenticationApiException("Tenant Login", "Invalid email address or password");
+                throw new AuthenticationApiException("login", "Invalid Credentials provided");
 
             SignInResult result = await _accountRepository.SignInAccount(email, password);
             if (result.Succeeded)
@@ -51,7 +49,26 @@ namespace AuthenticationServer.Logic.Services.Account
             if (result.IsNotAllowed)
                 throw new AuthenticationApiException("Tenant Login", "Email has not been verified yet.");
 
-            throw new AuthenticationApiException("Tenant Login", "Invalid email address or password");
+            throw new AuthenticationApiException("login", "Invalid Credentials provided");
+        }
+
+        protected async Task<Ticket> CreateAccessTicket(Guid accountId, Guid? applicationId, JwtModelDto jwtModelDto)
+        {
+            Ticket ticket = new Ticket();
+            ticket.RegisteredJWT = _jwtManager.GenerateToken(jwtModelDto);
+
+            if (jwtModelDto.RefreshExpireMinutes is not null)
+            {
+                ticket.RegisteredRefreshToken = Guid.NewGuid().ToString();
+
+                await _accountRepository.RegisterTicket(accountId, ticket);
+            }
+
+            // TODO refactor
+            if (applicationId is not null)
+                await _accountRepository.RegisterJWT(accountId, applicationId, ticket.RegisteredJWT);
+
+            return ticket;
         }
 
         public async Task ChangePassword(NewCredentials nc)
@@ -80,10 +97,10 @@ namespace AuthenticationServer.Logic.Services.Account
 
         public async Task VerifyEmail(string code)
         {
-            AccountDto tenantDto;
+            AbstractAccountDto tenantDto;
             try
             {
-                tenantDto = _mapper.Map<AccountDto>(await _accountRepository.Get(Guid.Parse(code)));
+                tenantDto = _mapper.Map<AbstractAccountDto>(await _accountRepository.Get(null, Guid.Parse(code)));
             }
             catch (Exception)
             {
@@ -93,53 +110,13 @@ namespace AuthenticationServer.Logic.Services.Account
             await _accountRepository.SetVerified(tenantDto.Id);
         }
 
-        public async Task<AccountDto> Get(Guid id)
+        public async Task<AbstractAccountDto> Get(Guid id)
         {
-            return _mapper.Map<AccountDto>(await _accountRepository.Get(id));
+            return _mapper.Map<AbstractAccountDto>(await _accountRepository.Get(null, id));
         }
 
-        protected async Task<AccountDto> CreateAccountAsync(AccountDto tenantDto)
-        {
-            int attempts = 0;
-            while (true)
-            {
-                try
-                {
-                    await PopulateAccountPropertiesForNewAccountAsync(tenantDto);
-
-                    var account = _mapper.Map<ApplicationUserEntity>(tenantDto);
-
-                    await _accountRepository.Insert(account, tenantDto.Password);
-
-                    break;
-                }
-                catch (DbUpdateException updateException)
-                {
-                    attempts++;
-                    if (attempts == 2)
-                        throw new Exception("guid error");
-                }
-            }
-
-            return tenantDto;
-        }
-
-        protected async Task PopulateLanguagePropertiesForNewAccountAsync(AccountDto accountDto)
-        {
-            foreach (LanguageDto languageDto in accountDto.Languages)
-            {
-                LanguageDto databaseLanguageDto = _mapper.Map<LanguageDto>(await _languageRepository.GetLanguageByName(languageDto.Name));
-                if (databaseLanguageDto is null)
-                    throw new AuthenticationApiException("language", $"{languageDto.Name} is not a supported language");
-
-                languageDto.Id = databaseLanguageDto.Id;
-                languageDto.Code = databaseLanguageDto.Code;
-                languageDto.RfcCode3066 = databaseLanguageDto.RfcCode3066;
-            }
-        }
-
-        protected abstract Task<JwtModelDto> CreateJwtConfigurationAsync(Guid? applicationId, AccountDto accountDto);
-        protected abstract Task PopulateAccountPropertiesForNewAccountAsync(AccountDto tenantDto);
+        public abstract Task<JwtModelDto> CreateJwtModelAsync<T>(Guid? applicationId, T accountDto) where T : AbstractAccountDto;
+        protected abstract void PopulateAccountPropertiesForNewAccountAsync(AbstractAccountDto tenantDto);
 
 
     }

@@ -1,7 +1,4 @@
-﻿using AuthenticationServer.Common.Enums;
-using AuthenticationServer.Common.Models.ContractModels;
-using AuthenticationServer.Common.Models.ContractModels.Token;
-using Newtonsoft.Json.Linq;
+﻿using AuthenticationServer.Common.Models.ContractModels;
 using System;
 using System.Collections.Generic;
 

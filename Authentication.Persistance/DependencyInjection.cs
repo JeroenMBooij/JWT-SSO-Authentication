@@ -19,7 +19,7 @@ namespace Authentication.Persistance
                          options.UseSqlServer(
                              configuration.GetConnectionString("MainIdentityConnection")));
 
-            services.AddScoped<IMainSqlDataAccess, MainSqlDataAccess>();
+            services.AddSingleton<IMainSqlDataAccess, MainSqlDataAccess>();
 
             #endregion
 

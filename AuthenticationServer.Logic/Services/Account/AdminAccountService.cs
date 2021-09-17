@@ -1,131 +1,98 @@
 ﻿using AuthenticationServer.Common.Enums;
-using AuthenticationServer.Common.Exceptions;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Interfaces.Services;
 using AuthenticationServer.Common.Models.ContractModels;
 using AuthenticationServer.Common.Models.ContractModels.Account;
-using AuthenticationServer.Common.Models.ContractModels.Applications;
+using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
+using AuthenticationServer.Common.Models.DTOs.Account;
 using AuthenticationServer.Domain.Entities;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Logic.Services.Account
 {
     public class AdminAccountService : AbstractAccountService, IAdminAccountService
     {
-        private readonly IApplicationRepository _applicationRepo;
         private readonly IConfiguration _config;
-        private readonly IJwtManager _jwtManager;
 
-        public AdminAccountService(IMapper mapper, IAdminAccountRepository applicationAccountRepo, ILanguageRepository languageRepository,
-            IApplicationRepository applicationRepo, IConfiguration config, IJwtManager jwtManager, IEmailManager emailManager)
-            : base(mapper, emailManager, applicationAccountRepo, languageRepository)
+        public AdminAccountService(IMapper mapper, IJwtManager jwtManager, IAdminAccountRepository applicationAccountRepo,
+            IConfiguration config, IEmailManager emailManager)
+            : base(mapper, jwtManager, emailManager, applicationAccountRepo)
         {
-            _applicationRepo = applicationRepo;
             _config = config;
-            _jwtManager = jwtManager;
         }
 
-        public async Task<string> LoginAsync(Credentials credentials)
+        public async Task<Ticket> LoginAsync(Credentials credentials, string hostname = "")
         {
-            AccountDto adminDto = await LoginAsync(credentials.Email, credentials.Password);
+            AdminAccountDto adminDto = await LoginAsync<AdminAccountDto>(credentials.Email, credentials.Password);
 
-            JwtModelDto jwtConfigurationDto = await CreateJwtConfigurationAsync(null, adminDto);
+            JwtModelDto jwtModelDto = await CreateJwtModelAsync(null, adminDto);
 
-            string token = _jwtManager.GenerateToken(jwtConfigurationDto);
+            Ticket ticket = await CreateAccessTicket(adminDto.Id, null, jwtModelDto);
 
-            return token;
+            return ticket; ;
         }
 
-        public async Task<string> RegisterAsync(AdminAccount applicationAccount)
+        public async Task<Ticket> LoginAsync(Credentials credentials, Guid applicationId)
         {
-            if (applicationAccount.Token != null)
-            {
-                List<ApplicationDto> applicationsDto = _mapper.Map<List<ApplicationDto>>(applicationAccount.Assets);
+            return await LoginAsync(credentials);
+        }
 
-                Guid userId = _jwtManager.GetUserId(applicationAccount.Token);
-                AccountDto accountDto = await Get(userId);
+        public async Task<string> RegisterAsync(AccountRegistration adminAccount)
+        {
+            AdminAccountDto adminAccountDto = _mapper.Map<AdminAccountDto>(adminAccount);
 
 
+            await CreateAccountAsync(adminAccountDto);
 
-                foreach (ApplicationDto applicationDto in applicationsDto)
-                {
-                    applicationDto.Tenant = accountDto;
-                    applicationDto.Id = accountDto.Id;
-
-                    await _applicationRepo.Insert(_mapper.Map<ApplicationEntity>(applicationDto));
-                }
-            }
+            if (Debugger.IsAttached == false)
+                await _emailManager.SendVerificationEmail(adminAccountDto.Email, adminAccountDto.Id);
             else
-            {
+                await _accountRepository.SetVerified(adminAccountDto.Id);
 
-                AccountDto adminAccountDto = _mapper.Map<AccountDto>(applicationAccount);
-
-                await CreateAccountAsync(adminAccountDto);
-
-                if (Debugger.IsAttached == false)
-                    await _emailManager.SendVerificationEmail(adminAccountDto.Email, adminAccountDto.Id);
-                else
-                    await _accountRepository.SetVerified(adminAccountDto.Id);
-
-                return $"An Email has been send to {adminAccountDto.Email}. Please confirm your Email to complete your registration.";
-            }
-
-            return "success";
-        }
-
-        public async Task UpdateApplicationAsync(ApplicationWithId application)
-        {
-            ApplicationDto applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.Get(application.Id));
-            if (applicationDto is null)
-                throw new AuthenticationApiException("update authentication", "Application not found", 404);
-
-            ApplicationDto mergedApplicationDto = _mapper.Map(application, applicationDto);
-
-            await _applicationRepo.Update(applicationDto.Id, _mapper.Map<ApplicationEntity>(mergedApplicationDto));
+            return $"An Email has been send to {adminAccountDto.Email}. Please confirm your Email to complete your registration.";
         }
 
 
-        protected override Task<JwtModelDto> CreateJwtConfigurationAsync(Guid? applicationId, AccountDto accountDto)
+        protected async Task<AdminAccountDto> CreateAccountAsync(AdminAccountDto tenantDto)
         {
-            JwtModelDto model = _config.GetSection("TenantJwtConfiguration")
+            PopulateAccountPropertiesForNewAccountAsync(tenantDto);
+
+            var account = _mapper.Map<ApplicationUserEntity>(tenantDto);
+
+            await _accountRepository.Insert(account, tenantDto.Password);
+
+            return tenantDto;
+        }
+
+
+        public override Task<JwtModelDto> CreateJwtModelAsync<T>(Guid? applicationId, T accountDto)
+        {
+            JwtModelDto model = _config.GetSection("JwtAdminConfig")
                                                                 .Get<JwtModelDto>();
+
+            model.Claims = new Claim[5];
+            model.Claims[0] = new Claim("uid", accountDto.Id.ToString());
+            model.Claims[1] = new Claim(ClaimTypes.Role, AccountRole.Admin.ToString());
+            model.Claims[2] = new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString());
+            model.Claims[3] = new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now).AddMinutes(model.ExpireMinutes.Value).ToUnixTimeSeconds().ToString());
+            model.Claims[4] = new Claim(JwtRegisteredClaimNames.Iss, _config["JwtAuthentication:Issuer"]);
+
 
             return Task.FromResult(model);
         }
 
-        protected override async Task PopulateAccountPropertiesForNewAccountAsync(AccountDto adminDto)
+        protected override void PopulateAccountPropertiesForNewAccountAsync(AbstractAccountDto adminDto)
         {
             adminDto.Id = Guid.NewGuid();
-            adminDto.AuthenticationRole = AccountRole.Admin.ToString();
             adminDto.LockoutEnabled = true;
-
-            foreach (ApplicationDto applicationDto in adminDto.Assets)
-            {
-                applicationDto.Id = Guid.NewGuid();
-                applicationDto.AdminId = adminDto.Id;
-                applicationDto.Tenant = adminDto;
-
-                foreach (DomainNameDto domainDto in applicationDto.Domains)
-                {
-                    domainDto.Id = Guid.NewGuid();
-                    domainDto.Application = applicationDto;
-                }
-
-                foreach (JwtTenantConfigDto jwtTenantconfig in applicationDto.JwtTenantConfigurations)
-                {
-                    jwtTenantconfig.Id = Guid.NewGuid();
-                    jwtTenantconfig.Application = applicationDto;
-                }
-            }
-
-            await PopulateLanguagePropertiesForNewAccountAsync(adminDto);
         }
     }
 }

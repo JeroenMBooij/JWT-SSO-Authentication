@@ -12,6 +12,6 @@ namespace AuthenticationServer.Common.Interfaces.Logic.Handlers
         Task<ApplicationDto> GetDomainFromUrl(string url);
         Task<ApplicationDto> GetDomainFromName(string name);
         Task<List<ApplicationDto>> GetDomainsFromAdminToken(string adminToken);
-        Task AddTenantToAdmin(AccountDto tenantDto);
+        Task AddTenantToAdmin(AbstractAccountDto tenantDto);
     }
 }

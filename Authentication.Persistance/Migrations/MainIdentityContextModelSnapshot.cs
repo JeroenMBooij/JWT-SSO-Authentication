@@ -19,21 +19,6 @@ namespace Authentication.Persistance.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.1");
 
-            modelBuilder.Entity("ApplicationUserEntityLanguageEntity", b =>
-                {
-                    b.Property<Guid>("LanguagesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TenantsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("LanguagesId", "TenantsId");
-
-                    b.HasIndex("TenantsId");
-
-                    b.ToTable("ApplicationUserEntityLanguageEntity");
-                });
-
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.ApplicationEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -49,7 +34,7 @@ namespace Authentication.Persistance.Migrations
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("LogoLocation")
+                    b.Property<string>("MultimediaUUID")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -100,6 +85,9 @@ namespace Authentication.Persistance.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("JwtIssuedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -125,6 +113,12 @@ namespace Authentication.Persistance.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RegisteredJWT")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegisteredRefreshToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -216,53 +210,6 @@ namespace Authentication.Persistance.Migrations
                     b.HasIndex("ApplicationId");
 
                     b.ToTable("JwtTenantConfig");
-                });
-
-            modelBuilder.Entity("AuthenticationServer.Domain.Entities.LanguageEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RfcCode3066")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Languages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("8f36b26c-05df-4b9b-ac26-4485c1f3c3f0"),
-                            Code = "nl",
-                            Created = new DateTime(2021, 6, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Nederlands",
-                            RfcCode3066 = "nl-NL"
-                        },
-                        new
-                        {
-                            Id = new Guid("f25f58b9-2f69-488d-b7e0-d77d5214b536"),
-                            Code = "us",
-                            Created = new DateTime(2021, 6, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "English",
-                            RfcCode3066 = "us-US"
-                        });
                 });
 
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.RoleEntity", b =>
@@ -397,21 +344,6 @@ namespace Authentication.Persistance.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("ApplicationUserEntityLanguageEntity", b =>
-                {
-                    b.HasOne("AuthenticationServer.Domain.Entities.LanguageEntity", null)
-                        .WithMany()
-                        .HasForeignKey("LanguagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AuthenticationServer.Domain.Entities.ApplicationUserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("TenantsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("AuthenticationServer.Domain.Entities.ApplicationEntity", b =>

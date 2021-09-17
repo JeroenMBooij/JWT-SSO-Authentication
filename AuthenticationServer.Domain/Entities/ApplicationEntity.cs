@@ -12,6 +12,7 @@ namespace AuthenticationServer.Domain.Entities
         public ApplicationEntity()
         {
             JwtTenantConfigurations = new HashSet<JwtTenantConfigEntity>();
+            Domains = new HashSet<DomainNameEntity>();
         }
 
         [Key]
@@ -26,7 +27,7 @@ namespace AuthenticationServer.Domain.Entities
         public Guid AdminId { get; set; }
 
         [Column]
-        public string LogoLocation { get; set; }
+        public string MultimediaUUID { get; set; }
 
         [Required]
         public virtual ApplicationUserEntity Admin { get; set; }

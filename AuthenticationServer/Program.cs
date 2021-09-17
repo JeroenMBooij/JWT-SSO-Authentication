@@ -29,33 +29,8 @@ namespace AuthenticationServer.Web
                 if (isDevelopment)
                     await context.Database.EnsureCreatedAsync();
                 else
-                {
                     await context.Database.MigrateAsync();
-
-                    IMainSqlDataAccess dataAccess = serviceProvider.GetRequiredService<IMainSqlDataAccess>();
-                    string sql = $"INSERT INTO dbo.Languages VALUES (@Id, @Name, @Code, @RfcCode3066, @Created)";
-                    var parameters = new 
-                    { 
-                        Id = Guid.NewGuid().ToString(),
-                        Name = "English",
-                        Code = "EN",
-                        RfcCode3066 = "en-EN",
-                        Created = DateTime.UtcNow
-                    };
-                    await dataAccess.SaveData<LanguageEntity, dynamic>(sql, parameters);
-
-                    sql = $"INSERT INTO dbo.Languages VALUES (@Id, @Name, @Code, @RfcCode3066, @Created)";
-                    parameters = new
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        Name = "Dutch",
-                        Code = "NL",
-                        RfcCode3066 = "nl-NL",
-                        Created = DateTime.UtcNow
-                    };
-
-                    await dataAccess.SaveData<LanguageEntity, dynamic>(sql, parameters);
-                }
+                
             }
             #endregion
 

@@ -14,10 +14,17 @@ namespace AuthenticationServer.Common.Models.ContractModels.Token
 
         public double? ExpireMinutes { get; set; }
 
+        public double? RefreshExpireMinutes { get; set; }
+
         [Required]
         public bool LockoutEnabled { get; set; }
 
         [Required]
-        public SecurityAlgorithm Algorithm { get; set; }
+        public bool ValidateIssuer { get; set; }
+
+        public string Issuer { get; set; }
+
+        [Required]
+        public string Algorithm { get; set; }
     }
 }

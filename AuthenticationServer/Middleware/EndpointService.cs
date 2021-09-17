@@ -1,7 +1,6 @@
-﻿using AuthenticationServer.Web.Middleware.Filters;
+﻿using AuthenticationServer.Web.Middleware.Attributes;
+using AuthenticationServer.Web.Middleware.Filters;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,11 +10,15 @@ namespace AuthenticationServer.Web.Middleware
     {
         public static IServiceCollection AddMyEndpoints(this IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(options =>
+            {
+                options.Conventions.Add(new ControllerDocumentationConvention());
+            });
 
             services.AddCors();
 
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.Filters.Add<ValidationFilter>(1);
                 options.Filters.Add<ErrorFilter>();
                 options.Filters.Add(new ConsumesAttribute("application/json"));

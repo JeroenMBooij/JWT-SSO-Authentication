@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace AuthenticationServer.Logic.Managers
 {
-    //TODO make pretty emails
     public class EmailManager : IEmailManager
     {
         private readonly IEmailClient _emailClient;

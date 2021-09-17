@@ -8,6 +8,6 @@ namespace AuthenticationServer.Common.Models.ContractModels.Applications
 {
     public class ApplicationWithId: Application
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
     }
 }

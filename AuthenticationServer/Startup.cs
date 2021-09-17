@@ -47,9 +47,11 @@ namespace AuthenticationServer.Web
             var jwtManager = new JwtManager("startup", Configuration);
             var jwtconfig = new JwtConfig()
             {
-                SecretKey = Configuration["JwtAuthentication:SecretKey"],
-                ExpireMinutes = double.Parse(Configuration["JwtAuthentication:ExpireMinutes"]),
-                Algorithm = Enum.Parse<SecurityAlgorithm>(Configuration["JwtAuthentication:Algorithm"])
+                SecretKey = Configuration["JwtAdminConfig:SecretKey"],
+                ExpireMinutes = double.Parse(Configuration["JwtAdminConfig:ExpireMinutes"]),
+                Algorithm = Enum.Parse<SecurityAlgorithm>(Configuration["JwtAdminConfig:Algorithm"]),
+                ValidateIssuer = true,
+                Issuer = Configuration["JwtAuthentication:Issuer"]
             };
 
             services.AddAuthentication(options =>
@@ -89,7 +91,7 @@ namespace AuthenticationServer.Web
         {
 
             #region routing
-            //app.UseHttpsRedirection();
+
             app.UseCors(options =>
             {
                 options.AllowAnyOrigin()

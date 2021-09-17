@@ -10,6 +10,7 @@ namespace AuthenticationServer.Common.Models.DTOs
         public string SecretKey { get; set; }
         public SecurityAlgorithm SecurityAlgorithm { get; set; }
         public double? ExpireMinutes { get; set; }
+        public long? RefreshExpireMinutes { get; set; }
         public Claim[] Claims { get; set; }
 
     }

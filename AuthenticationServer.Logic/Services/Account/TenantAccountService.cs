@@ -1,17 +1,21 @@
 ﻿using AuthenticationServer.Common.Constants.Token;
 using AuthenticationServer.Common.Enums;
+using AuthenticationServer.Common.Exceptions;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Interfaces.Services;
 using AuthenticationServer.Common.Models.ContractModels;
 using AuthenticationServer.Common.Models.ContractModels.Account;
+using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
+using AuthenticationServer.Common.Models.DTOs.Account;
+using AuthenticationServer.Domain.Entities;
 using AutoMapper;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -20,17 +24,14 @@ namespace AuthenticationServer.Logic.Services.Account
 {
     public class TenantAccountService : AbstractAccountService, ITenantAccountService
     {
-        private readonly IJwtManager _jwtManager;
         private readonly ITenantAccountRepository _tenantRepo;
         private readonly IApplicationRepository _applicationRepo;
         private readonly IJwtTenantConfigRepository _jwtTenantConfigRepo;
 
         public TenantAccountService(IMapper mapper, IJwtManager jwtManager, ITenantAccountRepository tenantRepo,
-            ILanguageRepository languageRepo, IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo,
-            IEmailManager emailManager)
-            : base(mapper, emailManager, tenantRepo, languageRepo)
+            IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo, IEmailManager emailManager)
+            : base(mapper, jwtManager, emailManager, tenantRepo)
         {
-            _jwtManager = jwtManager;
             _tenantRepo = tenantRepo;
             _applicationRepo = applicationRepo;
             _jwtTenantConfigRepo = jwtTenantConfigRepo;
@@ -42,39 +43,65 @@ namespace AuthenticationServer.Logic.Services.Account
             return _jwtManager.IsTokenValid(null, token);
         }
 
-        public async Task<string> LoginAsync(Credentials credentials, Guid applicationId)
+        public async Task<Ticket> LoginAsync(Credentials credentials, Guid applicationId)
         {
-            ApplicationDto applicationDto = _mapper.Map<ApplicationDto>
-                (await _applicationRepo.Get(applicationId));
+            Guid? adminId = await _accountRepository.GetAdminIdByEmail(credentials.Email);
+
+            var applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.Get(adminId.Value, applicationId));
+
+            if (applicationDto == null)
+                throw new AuthenticationApiException("Login", $"{applicationId} is an invalid applicationId");
 
             return await LoginAsync(credentials, applicationDto);
         }
 
-        public async Task<string> LoginAsync(Credentials credentials, string hostname)
+        public async Task<Ticket> LoginAsync(Credentials credentials, string hostname)
         {
             ApplicationDto applicationDto = _mapper.Map<ApplicationDto>
                 (await _applicationRepo.GetApplicationFromHostname(hostname));
 
+            if (applicationDto == null)
+                throw new AuthenticationApiException("Login", $"No application registered as {hostname}");
+
             return await LoginAsync(credentials, applicationDto);
         }
 
-        private async Task<string> LoginAsync(Credentials credentials, ApplicationDto applicationDto)
+        private async Task<Ticket> LoginAsync(Credentials credentials, ApplicationDto applicationDto)
         {
-            AccountDto tenantDto = await LoginAsync(credentials.Email, credentials.Password);
+            AbstractAccountDto tenantDto = await LoginAsync<TenantAccountDto>(credentials.Email, credentials.Password);
 
-            JwtModelDto jwtConfigurationDto = await CreateJwtConfigurationAsync(applicationDto.Id, tenantDto);
+            JwtModelDto jwtModelDto = await CreateJwtModelAsync(applicationDto.Id, tenantDto);
 
-            string token = _jwtManager.GenerateToken(jwtConfigurationDto);
 
-            return token;
+            Ticket ticket = await CreateAccessTicket(tenantDto.Id, applicationDto.Id, jwtModelDto);
+
+            return ticket;
         }
 
+        public async Task<string> RegisterAsync(AccountRegistration tenant)
+        {
+            if (tenant.AdminId is null)
+                throw new AuthenticationApiException("AccountData", "AdminId is required for Tenant Accounts");
 
-        public async Task<string> RegisterWithHostnameAsync(AccountRegistration tenant, string hostname)
+            ApplicationDto applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.Get(Guid.Parse(tenant.AdminId), Guid.Parse(tenant.ApplicationId)));
+
+            if(applicationDto is null)
+                throw new AuthenticationApiException("AccountData", "Invalid ApplicationId provided");
+
+
+            TenantAccountDto tenantDto = _mapper.Map<TenantAccountDto>(tenant);
+            tenantDto.AdminId = applicationDto.AdminId;
+            //TODO multiple jwt configurations on 1 application identifier
+            tenantDto.LockoutEnabled = applicationDto.JwtTenantConfigurations.FirstOrDefault().LockoutEnabled;
+
+            return await RegisterTenantAsync(tenantDto);
+        }
+
+        public async Task<string> RegisterWithHostnameAsync(AccountData tenant, string hostname)
         {
             ApplicationDto applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.GetApplicationFromHostname(hostname));
 
-            AccountDto tenantAccount = _mapper.Map<AccountDto>(tenant);
+            TenantAccountDto tenantAccount = _mapper.Map<TenantAccountDto>(tenant);
             tenantAccount.AdminId = applicationDto.AdminId;
             //TODO multiple jwt configurations on 1 application identifier
             tenantAccount.LockoutEnabled = applicationDto.JwtTenantConfigurations.FirstOrDefault().LockoutEnabled;
@@ -82,18 +109,18 @@ namespace AuthenticationServer.Logic.Services.Account
             return await RegisterTenantAsync(tenantAccount);
         }
 
-        public async Task<string> RegisterWithTokenAsync(AccountRegistration tenant, string adminToken)
+        public async Task<string> RegisterWithTokenAsync(AccountData tenant, string adminToken)
         {
             Guid adminId = _jwtManager.GetUserId(adminToken);
 
-            AccountDto tenantAccount = _mapper.Map<AccountDto>(tenant);
+            TenantAccountDto tenantAccount = _mapper.Map<TenantAccountDto>(tenant);
             tenantAccount.AdminId = adminId;
             tenantAccount.LockoutEnabled = true;
 
             return await RegisterTenantAsync(tenantAccount);
         }
 
-        private async Task<string> RegisterTenantAsync(AccountDto AccountDto)
+        private async Task<string> RegisterTenantAsync(TenantAccountDto AccountDto)
         {
             AccountDto = await CreateAccountAsync(AccountDto);
 
@@ -106,7 +133,19 @@ namespace AuthenticationServer.Logic.Services.Account
             return $"An Email has been send to {AccountDto.Email}. Please confirm your Email to complete your registration.";
         }
 
-        protected override async Task<JwtModelDto> CreateJwtConfigurationAsync(Guid? applicationId, AccountDto accountDto)
+        protected async Task<TenantAccountDto> CreateAccountAsync(TenantAccountDto tenantDto)
+        {
+            PopulateAccountPropertiesForNewAccountAsync(tenantDto);
+
+            var account = _mapper.Map<ApplicationUserEntity>(tenantDto);
+
+            await _accountRepository.Insert(account, tenantDto.Password);
+
+            return tenantDto;
+        }
+
+
+        public override async Task<JwtModelDto> CreateJwtModelAsync<T>(Guid? applicationId, T accountDto)
         {
             if (applicationId is null || accountDto is null)
                 throw new ArgumentException();
@@ -117,6 +156,7 @@ namespace AuthenticationServer.Logic.Services.Account
             model.SecretKey = jwtTenantConfigDto.SecretKey;
             model.SecurityAlgorithm = jwtTenantConfigDto.Algorithm;
             model.ExpireMinutes = jwtTenantConfigDto.ExpireMinutes;
+            model.RefreshExpireMinutes = jwtTenantConfigDto.RefreshExpireMinutes;
 
             List<Claim> claims = new List<Claim>();
             foreach (ClaimConfig claimConfig in jwtTenantConfigDto.Claims)
@@ -131,18 +171,16 @@ namespace AuthenticationServer.Logic.Services.Account
             return model;
         }
 
-        protected override async Task PopulateAccountPropertiesForNewAccountAsync(AccountDto tenantDto)
+        protected override void PopulateAccountPropertiesForNewAccountAsync(AbstractAccountDto tenantDto)
         {
             tenantDto.Id = Guid.NewGuid();
-            tenantDto.AuthenticationRole = AccountRole.Tenant.ToString();
-
-            await PopulateLanguagePropertiesForNewAccountAsync(tenantDto);
+            tenantDto.AuthenticationRole = AccountRole.Tenant;
         }
 
 
 
 
-        private string getConfiguredValue(ClaimConfig claimConfig, AccountDto accountDto, double? expireMinutes)
+        private string getConfiguredValue(ClaimConfig claimConfig, AbstractAccountDto accountDto, double? expireMinutes)
         {
             switch (claimConfig.Type)
             {
@@ -163,11 +201,11 @@ namespace AuthenticationServer.Logic.Services.Account
                     return new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString();
 
                 case ClaimType.Array:
-                    List<dynamic> claims = new List<dynamic>();
+                    JArray claims = new JArray();
                     foreach (ClaimConfig subClaimConfig in claimConfig.ClaimConfigurations)
                     {
-                        var subClaim = new ExpandoObject();
-                        ((IDictionary<string, object>)subClaim)[subClaimConfig.JwtName] = getConfiguredValue(subClaimConfig, accountDto, expireMinutes);
+                        var subClaim = new JObject();
+                        subClaim[subClaimConfig.JwtName] = getConfiguredValue(subClaimConfig, accountDto, expireMinutes);
                         claims.Add(subClaim);
                     }
 
@@ -177,5 +215,6 @@ namespace AuthenticationServer.Logic.Services.Account
                     throw new NotImplementedException();
             }
         }
+
     }
 }

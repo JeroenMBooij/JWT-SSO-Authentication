@@ -12,6 +12,9 @@ namespace AuthenticationServer.Common.Models.DTOs
     {
         public string SecretKey { get; set; }
         public double? ExpireMinutes { get; set; }
+        public long? RefreshExpireMinutes { get; set; }
+        public bool ValidateIssuer { get; set; }
+        public string Issuer { get; set; }
         public SecurityAlgorithm Algorithm { get; set; }
     }
 }

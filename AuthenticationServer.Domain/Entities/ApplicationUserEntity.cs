@@ -13,7 +13,7 @@ namespace AuthenticationServer.Domain.Entities
         {
             Tenants = new HashSet<ApplicationUserEntity>();
             Assets = new HashSet<ApplicationEntity>();
-            Languages = new HashSet<LanguageEntity>();
+            Roles = new HashSet<RoleEntity>();
         }
 
         [Required]
@@ -23,6 +23,18 @@ namespace AuthenticationServer.Domain.Entities
         [Column]
         [Required]
         public string AuthenticationRole { get; set; }
+
+        [Column]
+        public string RegisteredJWT { get; set; }
+
+        [Column]
+        public DateTime? JwtIssuedAt  { get; set; }
+
+        [Column]
+        public string RegisteredRefreshToken { get; set; }
+
+        [Column]
+        public string RegisteredApplication { get; set; }
 
         [Column]
         public Guid? AdminId { get; set; }
@@ -36,9 +48,6 @@ namespace AuthenticationServer.Domain.Entities
 
         public virtual ApplicationUserEntity Admin { get; set; }
         public virtual ICollection<ApplicationUserEntity> Tenants { get; set; }
-
-        [Required]
-        public virtual ICollection<LanguageEntity> Languages { get; set; }
 
         public virtual ICollection<ApplicationEntity> Assets { get; set; }
 

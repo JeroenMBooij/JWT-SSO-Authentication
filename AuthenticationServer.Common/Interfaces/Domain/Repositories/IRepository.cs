@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 
 namespace AuthenticationServer.Common.Interfaces.Domain.Repositories
 {
-    public interface IRepository<T>
+    public interface IRepository
     {
-        Task Insert(T entity, string data = "");
-        Task<T> Get(Guid id);
-        Task<List<T>> GetAll();
-        Task Update(Guid id, T entity);
-        Task Delete(T entity);
+        IMainSqlDataAccess Database { get; }
+        IAdminAccountRepository AdminAccount { get; }
+        ITenantAccountRepository TenantAccount { get; }
+        IApplicationRepository Application { get; }
+        IDomainNameRepository DomainName { get; }
+        IJwtTenantConfigRepository JwtTenantConfig { get; }
     }
 }

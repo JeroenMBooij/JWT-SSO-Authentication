@@ -1,7 +1,4 @@
-﻿using Authentication.Persistance.Seeds;
-using AuthenticationServer.Domain.Common;
-using AuthenticationServer.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using AuthenticationServer.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -36,8 +33,6 @@ namespace Authentication.Persistance.DataContext
             modelBuilder.Entity<ApplicationEntity>()
                 .HasIndex(x => x.Name).IsUnique();
 
-            modelBuilder.LanguageSeed();
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -53,7 +48,6 @@ namespace Authentication.Persistance.DataContext
         public virtual DbSet<ApplicationEntity> Applications { get; set; }
         public virtual DbSet<DomainNameEntity> Domains { get; set; }
         public virtual DbSet<JwtTenantConfigEntity> JwtTenantConfigurations { get; set; }
-        public virtual DbSet<LanguageEntity> Languages { get; set; }
         public virtual DbSet<ApplicationUserEntity> ApplicationUsers { get; set; }
 
 
