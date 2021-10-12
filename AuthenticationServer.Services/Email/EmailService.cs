@@ -55,6 +55,10 @@ namespace AuthenticationServer.Services.Email
             var recipients = new List<string>() { recipient };
             var message = new Message()
             {
+                //TODO enable configuration
+                    Sender = "jmbooij.a@gmail.com",
+                    AppKey = _config["EMAIL_APPKEY"],
+                //
                 Recipients = recipients,
                 Subject = subject,
                 Content = verificationLink

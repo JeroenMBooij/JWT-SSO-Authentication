@@ -23,7 +23,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
         public MainSqlDataAccess(IConfiguration config)
         {
             _config = config;
-            _connectionString = _config.GetConnectionString("MainIdentityConnection");
+            _connectionString = _config["IDENTITY_DB_CONNECTION_STRING"];
         }
 
 
