@@ -1,22 +1,20 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
-COPY ["AuthenticationServer/AuthenticationServer.Web.csproj", "AuthenticationServer/"]
-COPY ["AuthenticationServer.Infrastructure/AuthenticationServer.Infrastructure.csproj", "AuthenticationServer.Infrastructure/"]
+COPY ["AuthenticationServer.Web/AuthenticationServer.Web.csproj", "AuthenticationServer.Web/"]
+COPY ["AuthenticationServer.Services/AuthenticationServer.Services.csproj", "AuthenticationServer.Services/"]
 COPY ["AuthenticationServer.Domain/AuthenticationServer.Domain.csproj", "AuthenticationServer.Domain/"]
 COPY ["Authentication.Persistance/Authentication.Persistance.csproj", "Authentication.Persistance/"]
 COPY ["AuthenticationServer.Common/AuthenticationServer.Common.csproj", "AuthenticationServer.Common/"]
-COPY ["AuthenticationServer.Service/AuthenticationServer.Service.csproj", "AuthenticationServer.Service/"]
 COPY ["AuthenticationServer.Logic/AuthenticationServer.Logic.csproj", "AuthenticationServer.Logic/"]
-RUN dotnet restore "AuthenticationServer/AuthenticationServer.Web.csproj"
+RUN dotnet restore "AuthenticationServer.Web/AuthenticationServer.Web.csproj"
 COPY . .
-WORKDIR "/src/AuthenticationServer"
+WORKDIR "/src/AuthenticationServer.Web"
 RUN dotnet build "AuthenticationServer.Web.csproj" -c Release -o /app/build
 
 FROM build AS publish

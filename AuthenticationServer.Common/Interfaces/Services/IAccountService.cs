@@ -13,7 +13,7 @@ namespace AuthenticationServer.Common.Interfaces.Services
         Task<Ticket> LoginAsync(Credentials credentials, string hostname = "");
         Task<string> RegisterAsync(AccountRegistration applicationAccount);
         Task<AbstractAccountDto> Get(Guid id);
-        Task VerifyEmail(string code);
+        Task<string> VerifyEmail(Guid code);
         Task ChangePassword(NewCredentials newCredentials);
         Task RecoverPassword(ResetPasswordModel resetPasswordModel);
         Task ResetPassword(string email);

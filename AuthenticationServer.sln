@@ -14,9 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{ADEF2641-1BB2-4CE8-B42E-98F575E71782}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{D9586CC3-BA3A-4793-AED6-7FCD01B550CC}"
-	ProjectSection(SolutionItems) = preProject
-		AuthenticationServer\docker-compose.yml = AuthenticationServer\docker-compose.yml
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{CF127756-10A3-4D55-A719-1508FB2C695D}"
 EndProject

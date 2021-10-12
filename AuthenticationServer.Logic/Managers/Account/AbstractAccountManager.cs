@@ -95,12 +95,12 @@ namespace AuthenticationServer.Logic.Workers.Account
 
         }
 
-        public async Task VerifyEmail(string code)
+        public async Task<string> VerifyEmail(Guid code)
         {
             AbstractAccountDto tenantDto;
             try
             {
-                tenantDto = _mapper.Map<AbstractAccountDto>(await _accountRepository.Get(null, Guid.Parse(code)));
+                tenantDto = _mapper.Map<AbstractAccountDto>(await _accountRepository.Get(null, code));
             }
             catch (Exception)
             {
@@ -108,6 +108,8 @@ namespace AuthenticationServer.Logic.Workers.Account
             }
 
             await _accountRepository.SetVerified(tenantDto.Id);
+
+            return tenantDto.Email;
         }
 
         public async Task<AbstractAccountDto> Get(Guid id)
