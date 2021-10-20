@@ -8,7 +8,7 @@ The application software architecture is designed using a clean code approach wi
 
 <img src="https://i.imgur.com/Toqkgg9.png" width="1000" style="margin-left: auto; margin-right:auto;"/>
 
-<p><b>Web layer</b> contains contains all controllers for endpoints and is responsible for handling all the requests made to the API</p> <br>
+<p><b>Web layer | API layer</b> contains contains all controllers for endpoints and is responsible for handling all the requests made to the API</p> <br>
 
 <p><b>Domain layer</b> contains contains all the definitions for the database entities</p> <br>
 
