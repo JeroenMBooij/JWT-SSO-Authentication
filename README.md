@@ -13,7 +13,9 @@ This repository contains the source code for an API where developers can manage 
    <p> 3. open localhost:3000</p>
 
 <h4>docker-compose.vs.debug.yml example file</h4>
+
 ```
+
 version: '3.4'
 
 services:
