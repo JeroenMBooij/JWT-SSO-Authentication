@@ -8,7 +8,7 @@ This repository contains the source code for an API where developers can manage 
   <br/>
   <br/>
   <b>steps</b>
-   <p> 1. Override secrets in docker-compose with a docker-compose.vs.debug.yml file</p>
+   <p> 1. Override secrets in docker-compose with a docker-compose.vs.debug.yml file or define the secrets as environment variables in your pipeline</p>
    <p> 2. run docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.vs.debug.yml up -d</p>
    <p> 3. open localhost:3000</p>
 
