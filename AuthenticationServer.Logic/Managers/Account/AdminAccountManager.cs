@@ -24,7 +24,7 @@ namespace AuthenticationServer.Logic.Workers.Account
 
         public AdminAccountManager(IMapper mapper, IJwtTokenWorker jwtManager, IAdminAccountRepository applicationAccountRepo,
             IConfiguration config, IEmailService emailManager)
-            : base(mapper, jwtManager, emailManager, applicationAccountRepo)
+            : base(mapper, jwtManager, emailManager, applicationAccountRepo, config)
         {
             _config = config;
         }
@@ -52,12 +52,16 @@ namespace AuthenticationServer.Logic.Workers.Account
 
             await CreateAccountAsync(adminAccountDto);
 
-            if (Debugger.IsAttached == false)
+            if (_config["NETWORK_ENVIRONMENT"] != "Standalone")
+            {
                 await _emailManager.SendVerificationEmail(adminAccountDto.Email, adminAccountDto.Id);
+                return $"An Email has been send to {adminAccountDto.Email}. Please confirm your Email to complete your registration.";
+            }
             else
+            {
                 await _accountRepository.SetVerified(adminAccountDto.Id);
-
-            return $"An Email has been send to {adminAccountDto.Email}. Please confirm your Email to complete your registration.";
+                return $"Email verified you can now login. Deploy email service to send emails https://github.com/JeroenMBooij/EmailService and remove the NETWORK_ENVIRONMENT variable from docker-compose";
+            }
         }
 
 
@@ -85,7 +89,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             model.Claims[3] = new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now).AddMinutes(model.ExpireMinutes.Value).ToUnixTimeSeconds().ToString());
             model.Claims[4] = new Claim(JwtRegisteredClaimNames.Iss, _config["JWT_ISSUER"]);
 
-
+            model.SecretKey = _config["JWT_SECRETKEY"];
             return Task.FromResult(model);
         }
 

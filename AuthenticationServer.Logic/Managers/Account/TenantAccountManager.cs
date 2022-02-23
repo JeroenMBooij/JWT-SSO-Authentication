@@ -11,6 +11,7 @@ using AuthenticationServer.Common.Models.DTOs;
 using AuthenticationServer.Common.Models.DTOs.Account;
 using AuthenticationServer.Domain.Entities;
 using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -27,14 +28,17 @@ namespace AuthenticationServer.Logic.Workers.Account
         private readonly ITenantAccountRepository _tenantRepo;
         private readonly IApplicationRepository _applicationRepo;
         private readonly IJwtTenantConfigRepository _jwtTenantConfigRepo;
+        private readonly IConfiguration _config;
 
         public TenantAccountManager(IMapper mapper, IJwtTokenWorker jwtManager, ITenantAccountRepository tenantRepo,
-            IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo, IEmailService emailManager)
-            : base(mapper, jwtManager, emailManager, tenantRepo)
+            IApplicationRepository applicationRepo, IJwtTenantConfigRepository jwtTenantConfigRepo, IEmailService emailManager,
+            IConfiguration config)
+            : base(mapper, jwtManager, emailManager, tenantRepo, config)
         {
             _tenantRepo = tenantRepo;
             _applicationRepo = applicationRepo;
             _jwtTenantConfigRepo = jwtTenantConfigRepo;
+            _config = config;
         }
 
 
@@ -133,13 +137,18 @@ namespace AuthenticationServer.Logic.Workers.Account
         {
             AccountDto = await CreateAccountAsync(AccountDto);
 
-            if (Debugger.IsAttached == false)
+            if (_config["NETWORK_ENVIRONMENT"] != "Standalone")
+            {
                 await _emailManager.SendVerificationEmail(AccountDto.Email, AccountDto.Id);
+                return $"An Email has been send to {AccountDto.Email}. Please confirm your Email to complete your registration.";
+            }
             else
+            {
                 await _tenantRepo.SetVerified(AccountDto.Id);
+                return $"Email verified you can now login. Deploy email service to send emails https://github.com/JeroenMBooij/EmailService and remove the NETWORK_ENVIRONMENT variable from docker-compose";
+            }
 
 
-            return $"An Email has been send to {AccountDto.Email}. Please confirm your Email to complete your registration.";
         }
 
         protected async Task<TenantAccountDto> CreateAccountAsync(TenantAccountDto tenantDto)

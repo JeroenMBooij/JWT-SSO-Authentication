@@ -15,8 +15,9 @@ namespace Authentication.Persistance
         public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration configuration)
         {
             #region Data Access
+            var connectionString = GetDatabaseConnectionString(configuration);
             services.AddDbContext<MainIdentityContext>(options =>
-                         options.UseSqlServer(configuration["IDENTITY_DB_CONNECTION_STRING"]));
+                         options.UseSqlServer(connectionString));
 
             services.AddSingleton<IMainSqlDataAccess, MainSqlDataAccess>();
 
@@ -52,6 +53,15 @@ namespace Authentication.Persistance
 
 
             return services;
+        }
+        public static string GetDatabaseConnectionString(IConfiguration configuration)
+        {
+            var dbHost = configuration["DB_HOST"];
+            var dbName = configuration["DB_NAME"];
+            var dbUser = configuration["DB_USER"];
+            var dbPassword = configuration["DB_PASSWORD"];
+
+            return $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};";
         }
     }
 

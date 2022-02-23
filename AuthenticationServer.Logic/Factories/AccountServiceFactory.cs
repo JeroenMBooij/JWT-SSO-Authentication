@@ -92,7 +92,7 @@ namespace AuthenticationServer.Logic.Factories
             Dictionary<AccountRole, IAccountService> typeMap = new Dictionary<AccountRole, IAccountService>();
 
             var tenantService = new TenantAccountManager(_mapper, _jwtManager, _tenantRepo,
-                _applicationRepo, _jwtTenantConfigRepo, _emailManager);
+                _applicationRepo, _jwtTenantConfigRepo, _emailManager, _config);
 
             typeMap.Add(AccountRole.Tenant, tenantService);
 

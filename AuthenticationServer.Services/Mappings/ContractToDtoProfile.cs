@@ -77,6 +77,12 @@ namespace AuthenticationServer.Services.Mappings
                 .ForMember(destination => destination.IconUUID,
                                 options => options.MapFrom(source => Guid.Parse(source.IconUUID)));
 
+            CreateMap<ApplicationDto, ApplicationWithId>()
+                .ForMember(destination => destination.Id,
+                                options => options.MapFrom(source => source.Id.ToString()))
+                .ForMember(destination => destination.IconUUID,
+                                options => options.MapFrom(source => source.IconUUID.ToString()));
+
             CreateMap<JwtTenantConfig, JwtTenantConfigDto>()
                 .ForMember(destination => destination.Algorithm,
                             options => options.MapFrom(source => Enum.Parse<SecurityAlgorithm>(source.Algorithm)))

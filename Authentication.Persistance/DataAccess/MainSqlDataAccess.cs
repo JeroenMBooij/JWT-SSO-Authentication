@@ -1,4 +1,5 @@
-﻿using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
+﻿using Authentication.Persistance;
+using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +24,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
         public MainSqlDataAccess(IConfiguration config)
         {
             _config = config;
-            _connectionString = _config.GetConnectionString("MainIdentityConnection");
+            _connectionString = DependencyInjection.GetDatabaseConnectionString(_config);
         }
 
 
@@ -212,7 +213,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             {
                 await _connection.ExecuteAsync(sql, parameters, _transaction);
             }
-            catch
+            catch(Exception error)
             {
                 _transaction.Rollback();
                 throw;
@@ -247,7 +248,8 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
         public void Dispose()
         {
-            CommitTransaction();
+            if(_transaction.Connection is not null && _transaction.Connection.State == ConnectionState.Open)
+                CommitTransaction();
         }
 
     }

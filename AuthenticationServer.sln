@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationServer.Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationServer.Web", "AuthenticationServer.Web\AuthenticationServer.Web.csproj", "{75395662-ED98-4DFD-A7E9-161E3B4E19FE}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{7F10DAD3-BCBD-42C2-B44B-AA78B2D9B64B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{75395662-ED98-4DFD-A7E9-161E3B4E19FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75395662-ED98-4DFD-A7E9-161E3B4E19FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75395662-ED98-4DFD-A7E9-161E3B4E19FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F10DAD3-BCBD-42C2-B44B-AA78B2D9B64B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F10DAD3-BCBD-42C2-B44B-AA78B2D9B64B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F10DAD3-BCBD-42C2-B44B-AA78B2D9B64B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F10DAD3-BCBD-42C2-B44B-AA78B2D9B64B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

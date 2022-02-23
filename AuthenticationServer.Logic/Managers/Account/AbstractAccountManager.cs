@@ -3,11 +3,14 @@ using AuthenticationServer.Common.Extentions;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Models.ContractModels;
+using AuthenticationServer.Common.Models.ContractModels.Account;
 using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Logic.Workers.Account
@@ -16,13 +19,15 @@ namespace AuthenticationServer.Logic.Workers.Account
     {
         protected readonly IEmailService _emailManager;
         protected readonly IAccountRepository _accountRepository;
+        private readonly IConfiguration _config;
         protected readonly IMapper _mapper;
         protected readonly IJwtTokenWorker _jwtManager;
 
-        public AbstractAccountManager(IMapper mapper, IJwtTokenWorker jwtManager, IEmailService emailManager, IAccountRepository accountRepository)
+        public AbstractAccountManager(IMapper mapper, IJwtTokenWorker jwtManager, IEmailService emailManager, IAccountRepository accountRepository, IConfiguration config)
         {
             _emailManager = emailManager;
             _accountRepository = accountRepository;
+            _config = config;
             _mapper = mapper;
             _jwtManager = jwtManager;
         }
@@ -82,8 +87,18 @@ namespace AuthenticationServer.Logic.Workers.Account
         public async Task ResetPassword(string email)
         {
             string passwordRecoverToken = await _accountRepository.ResetPassword(email);
+            if (_config["NETWORK_ENVIRONMENT"] != "Standalone")
+            {
+                await _emailManager.SendRecoverPasswordEmail(email, passwordRecoverToken);
+            }
+            else
+            {
+                var errorModel = new List<ErrorModel>();
+                errorModel.Add(new ErrorModel() { FieldName = "Message", Message = "deploy email service to use this functionality https://github.com/JeroenMBooij/EmailService" });
+                errorModel.Add(new ErrorModel() { FieldName = "Message", Message = "And remove the NETWORK_ENVIRONMENT variable from docker-compose" });
 
-            await _emailManager.SendRecoverPasswordEmail(email, passwordRecoverToken);
+                throw new AuthenticationApiException(errorModel, 500);
+            }
         }
 
         public async Task RecoverPassword(ResetPasswordModel rpm)

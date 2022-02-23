@@ -1,0 +1,33 @@
+version: '3.4'
+
+services:
+  authenticationserver.web:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development      
+      NETWORK_ENVIRONMENT: Standalone      
+      DB_HOST: ${MSSQL_IDENTITY_HOST}
+      DB_NAME: ${MSSQL_IDENTITY_NAME}
+      DB_USER: ${MSSQL_IDENTITY_USER}
+      DB_PASSWORD: ${MSSQL_IDENTITY_PASSWORD}
+      JWT_SECRETTKEY: ${JWT_SECRETKEY}
+      JWT_ISSUER: ${JWT_ISSUER}
+      EMAIL_APPKEY: ${EMAIL_APPKEY}
+    ports:
+      - "3000:80"   
+    volumes:
+      - /home/server/files:/app/UploadedFiles
+    networks:
+      - proxynet
+    depends_on: 
+      - identitydb
+
+  identitydb:
+    container_name: identitydb
+    restart: always
+    ports:
+      - "3003:1433"
+    networks:
+      - proxynet
+    environment:
+      - SA_PASSWORD=${MSSQL_IDENTITY_PASSWORD}
+      - ACCEPT_EULA=Y

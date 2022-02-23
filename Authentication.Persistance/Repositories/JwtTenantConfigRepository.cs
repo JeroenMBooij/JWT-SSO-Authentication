@@ -35,7 +35,7 @@ namespace Authentication.Persistance.Repositories
         public async Task<Guid> Insert(JwtTenantConfigEntity JwtTenantConfigEntity, string data = "")
         {
             string sql = $@"INSERT INTO dbo.{typeof(JwtTenantConfigEntity).GetTableName()}
-                            VALUES (@JwtTenantConfigId, @SecretKey, @Claims, @ExpireMinutes, @Algorithm, @ApplicationId, @Created, @LastModified);";
+                            VALUES (@JwtTenantConfigId, @SecretKey, @Claims, @ExpireMinutes, @RefreshExpireMinutes, @Algorithm, @ApplicationId, @Created, @LastModified);";
 
             var parameters = new DynamicParameters();
             parameters.AddColumnParameters(JwtTenantConfigEntity, null);
