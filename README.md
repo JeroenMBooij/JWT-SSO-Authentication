@@ -6,11 +6,11 @@ This repository contains the source code for an API where developers can manage 
   * prerequisite - docker installed <br/>
   ** optional - this application depends on <a href="https://github.com/JeroenMBooij/EmailService" target="_blank">my email service</a> repository for all email functionality
   <br/>
-  <ul>
-   <li> 1. Override secrets in docker-compose with a docker-compose.vs.debug.yml file</li>
-   <li> 2. run docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.vs.debug.yml up -d</li>
-   <li> 3. open localhost:3000</li>
- <ul/>
+  <br/>
+  <p>steps</p>
+   <p> 1. Override secrets in docker-compose with a docker-compose.vs.debug.yml file</p>
+   <p> 2. run docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.vs.debug.yml up -d</p>
+   <p> 3. open localhost:3000</p>
 
 <h4>docker-compose.vs.debug.yml example file</h4>
 ```
