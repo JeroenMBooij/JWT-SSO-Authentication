@@ -25,7 +25,7 @@ services:
       DB_HOST: identitydb
       DB_NAME: IdentityDb
       DB_USER: sa
-      DB_PASSWORD: SeCret1234
+      DB_PASSWORD: [your password]
       JWT_SECRETTKEY: [your secret key]
       JWT_ISSUER: [You]
       EMAIL_APPKEY: [Your Google Email app key]
