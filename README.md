@@ -1,7 +1,42 @@
 # Authentication Server
 
 This repository contains the source code for an API where developers can manage their authentication needs. A Developer can use this API to design multiple JWT's to fit needs and assign it to their applications. Furthermore, with the refresh endpoint you can switch between JWT designs incase your application communicates with multiple services which require different JWT's. This scheme allows a user to log in with a single ID and password to any of several related, yet independent, software systems.
-An instance of this application is running on: <a href="https://auth.aapie.xyz">https://auth.aapie.xyz/index.html</a> 
+
+<h1> Usage </h1>
+  * prerequisite - docker installed <br/>
+  ** optional - this application depends on <a href="https://github.com/JeroenMBooij/EmailService" target="_blank">my email service</a> repository for all email functionality
+  <br/>
+  <br/>
+  <b>steps</b>
+   <p> 1. Override secrets in docker-compose with a docker-compose.vs.debug.yml file or define the secrets as environment variables in your pipeline</p>
+   <p> 2. run docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.vs.debug.yml up -d</p>
+   <p> 3. open localhost:3000</p>
+
+<h4>docker-compose.vs.debug.yml example file</h4>
+
+```
+
+version: '3.4'
+
+services:
+
+  authenticationserver.web:
+    environment:
+      DB_HOST: identitydb
+      DB_NAME: IdentityDb
+      DB_USER: sa
+      DB_PASSWORD: [your password]
+      JWT_SECRETTKEY: [your secret key]
+      JWT_ISSUER: [You]
+      EMAIL_APPKEY: [Your Google Email app key]
+
+  identitydb:
+    environment:
+      - SA_PASSWORD=SeCret1234
+      
+```
+
+<h1>design</h1>
 
 The application software architecture is designed using a clean code approach with Dependency Inversion Principle and Domain-Driven Design
 
