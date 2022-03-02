@@ -102,6 +102,35 @@ namespace AuthenticationServer.Logic.Workers
 
         }
 
+        public bool IsTokenValid(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                throw new ArgumentException("Given token is null or empty.");
+
+            var jwtconfig = new JwtConfig()
+            {
+                SecretKey = _config["JWT_SECRETKEY"],
+                ExpireMinutes = double.Parse(_config["JwtAdminConfig:ExpireMinutes"]),
+                Algorithm = Enum.Parse<SecurityAlgorithm>(_config["JwtAdminConfig:Algorithm"]),
+                ValidateIssuer = true,
+                Issuer = _config["JWT_ISSUER"]
+            };
+
+            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters(jwtconfig);
+
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                throw new Exception(exception.Message);
+            }
+
+        }
+
         public bool IsTokenSignatureValid(JwtTenantConfigDto jwtTenantConfigDto, string token)
         {
             if (string.IsNullOrEmpty(token))

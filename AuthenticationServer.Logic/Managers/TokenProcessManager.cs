@@ -72,9 +72,14 @@ namespace AuthenticationServer.Logic.Workers.Account
 
             var account = await _repository.TenantAccount.Get(null, accountId);
 
-            JwtTenantConfigDto jwtTenantConfigDto = _mapper.Map<JwtTenantConfigDto>(await _repository.JwtTenantConfig.GetFromApplicationId(Guid.Parse(account.RegisteredApplication)));
+            if (account.AuthenticationRole == "Admin")
+                return _jwtManager.IsTokenValid(token);
+            else
+            {
+                JwtTenantConfigDto jwtTenantConfigDto = _mapper.Map<JwtTenantConfigDto>(await _repository.JwtTenantConfig.GetFromApplicationId(Guid.Parse(account.RegisteredApplication)));
+                return _jwtManager.IsTokenValid(jwtTenantConfigDto, token);
+            }
 
-            return _jwtManager.IsTokenValid(jwtTenantConfigDto, token);
         }
     }
 }

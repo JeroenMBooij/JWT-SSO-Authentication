@@ -12,6 +12,7 @@ namespace AuthenticationServer.Common.Interfaces.Logic.Managers
     public interface IJwtTokenWorker
     {
         bool IsTokenValid(JwtTenantConfigDto jwtTenantConfigDto, string token);
+        bool IsTokenValid(string token);
         bool IsTokenSignatureValid(JwtTenantConfigDto jwtTenantConfigDto, string token);
         string GenerateToken(JwtModelDto model);
         IEnumerable<Claim> GetTokenClaimsWithValidation(JwtTenantConfigDto jwtTenantConfigDto, string token);
