@@ -34,7 +34,7 @@ namespace Authentication.Persistance.Repositories
             if (applicationUserEntity == null)
                 throw new AuthenticationApiException("Tenant Account", $"No account was found for {email}");
 
-            string sql = $"SELECT * FROM dbo.AspNetRoles where ApplicationUserEntityId = @Id";
+            string sql = $"SELECT * FROM AspNetRoles where ApplicationUserEntityId = @Id";
             var parameters = new { Id = applicationUserEntity.Id.ToString() };
 
             applicationUserEntity.Roles = await _db.GetData<List<RoleEntity>, dynamic>(sql, parameters);
@@ -66,7 +66,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task RegisterTicket(Guid userId, Ticket ticket)
         {
-            string sql = $@"UPDATE dbo.ApplicationUsers 
+            string sql = $@"UPDATE ApplicationUsers 
                             SET {nameof(ApplicationUserEntity.RegisteredJWT)} = @Jwt,
                                 {nameof(ApplicationUserEntity.RegisteredRefreshToken)} = @RefreshToken,
                                 {nameof(ApplicationUserEntity.JwtIssuedAt)} = @issuedAt
@@ -85,7 +85,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task RegisterJWT(Guid accountId, Guid? applicationId, string registeredJWT)
         {
-            string sql = $@"UPDATE dbo.ApplicationUsers 
+            string sql = $@"UPDATE ApplicationUsers 
                             SET {nameof(ApplicationUserEntity.RegisteredJWT)} = @Jwt,
                                 {nameof(ApplicationUserEntity.RegisteredApplication)} = @ApplicationId,
                                 {nameof(ApplicationUserEntity.JwtIssuedAt)} = @issuedAt
@@ -107,7 +107,7 @@ namespace Authentication.Persistance.Repositories
             string sql = $@"SELECT {nameof(ApplicationUserEntity.RegisteredJWT)},
                                    {nameof(ApplicationUserEntity.RegisteredRefreshToken)},
                                    {nameof(ApplicationUserEntity.JwtIssuedAt)}
-                            FROM dbo.ApplicationUsers
+                            FROM ApplicationUsers
                             WHERE Id = @Id";
 
             var parameters = new { Id = userId };
@@ -137,7 +137,7 @@ namespace Authentication.Persistance.Repositories
         public virtual async Task<ApplicationUserEntity> Get(Guid? adminId, Guid id)
         {
             string sql = $@"SELECT * 
-                            FROM dbo.ApplicationUsers 
+                            FROM ApplicationUsers 
                             WHERE Id = @Id";
 
             var parameters = new { Id = id.ToString() };
@@ -148,7 +148,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task SetVerified(Guid id)
         {
-            string sql = $"UPDATE dbo.ApplicationUsers SET EmailConfirmed = '1' where Id = @Id";
+            string sql = $"UPDATE ApplicationUsers SET EmailConfirmed = '1' where Id = @Id";
             var parameters = new { Id = id.ToString() };
 
             await _db.SaveData<object>(sql, parameters);

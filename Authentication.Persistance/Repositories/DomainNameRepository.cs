@@ -20,7 +20,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<Guid> Insert(DomainNameEntity domainNameEntity, string data = "")
         {
-            string sql = $@"INSERT INTO dbo.{typeof(DomainNameEntity).GetTableName()}
+            string sql = $@"INSERT INTO {typeof(DomainNameEntity).GetTableName()}
                             VALUES (@DomainNameId, @Name, @Url, @ApplicationId, @Created, @LastModified);";
 
             var parameters = new DynamicParameters();
@@ -43,7 +43,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task Update(Guid adminId, Guid id, DomainNameEntity domainNameEntity)
         {
-            string sql = $@"UPDATE dbo.{typeof(DomainNameEntity).GetTableName()}
+            string sql = $@"UPDATE {typeof(DomainNameEntity).GetTableName()}
                             SET Name = @Name, 
                             Url = @Url,
                             LastModified = @LastModified;

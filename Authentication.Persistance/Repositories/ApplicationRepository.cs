@@ -22,7 +22,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<ApplicationEntity> GetApplicationFromName(string name)
         {
-            string sql = $"SELECT * FROM dbo.Applications where name LIKE @Name";
+            string sql = $"SELECT * FROM Applications where name LIKE @Name";
             var parameters = new { Name = $"{name}%" };
 
             return await _db.GetData<ApplicationEntity, dynamic>(sql, parameters);
@@ -30,7 +30,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<ApplicationEntity> GetApplicationFromHostname(string url)
         {
-            string sql = $"SELECT * FROM dbo.Applications where url LIKE @Url";
+            string sql = $"SELECT * FROM Applications where url LIKE @Url";
             var parameters = new { Url = $"{url}%" };
 
             return await _db.GetData<ApplicationEntity, dynamic>(sql, parameters);
@@ -38,7 +38,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<List<ApplicationEntity>> GetApplicationsFromAdminId(Guid adminId)
         {
-            string sql = $"SELECT * FROM dbo.Applications where AdminId = @AdminId";
+            string sql = $"SELECT * FROM Applications where AdminId = @AdminId";
             var parameters = new { AdminId = adminId };
 
             return await _db.GetData<List<ApplicationEntity>, dynamic>(sql, parameters);
@@ -62,7 +62,7 @@ namespace Authentication.Persistance.Repositories
         public async Task<AccountRole?> GetAccountRole(Guid id)
         {
             string sql = $@"SELECT {nameof(ApplicationUserEntity.AuthenticationRole)} 
-                            FROM dbo.{typeof(ApplicationEntity).GetTableName()} 
+                            FROM {typeof(ApplicationEntity).GetTableName()} 
                             where {nameof(ApplicationUserEntity.Id)} = @Id";
 
             var parameters = new { Id = id.ToString() };
@@ -77,7 +77,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<Guid> Insert(ApplicationEntity applicationEntity, string data = "")
         {
-            string sql = $@"INSERT INTO dbo.{typeof(ApplicationEntity).GetTableName()}
+            string sql = $@"INSERT INTO {typeof(ApplicationEntity).GetTableName()}
                             VALUES (@ApplicationsId, @Name, @AdminId, @MultimediaUUID, @Created, @LastModified);";
 
             var parameters = new DynamicParameters();
@@ -91,10 +91,10 @@ namespace Authentication.Persistance.Repositories
         public async Task<ApplicationEntity> Get(Guid? adminId, Guid id)
         {
             string sql = $@"SELECT app.*, jwt.*, dn.* 
-                            FROM dbo.{typeof(ApplicationEntity).GetTableName()} app
-                            LEFT JOIN dbo.{typeof(JwtTenantConfigEntity).GetTableName()} jwt
+                            FROM {typeof(ApplicationEntity).GetTableName()} app
+                            LEFT JOIN {typeof(JwtTenantConfigEntity).GetTableName()} jwt
                                 ON app.{nameof(ApplicationEntity.Id)} = jwt.{nameof(JwtTenantConfigEntity.ApplicationId)}
-                            LEFT JOIN dbo.{typeof(DomainNameEntity).GetTableName()} dn
+                            LEFT JOIN {typeof(DomainNameEntity).GetTableName()} dn
                                 ON app.{nameof(ApplicationEntity.Id)} = dn.{nameof(DomainNameEntity.ApplicationId)}
                             WHERE app.{nameof(ApplicationEntity.Id)} = @Id;";
 
@@ -119,10 +119,10 @@ namespace Authentication.Persistance.Repositories
         public async Task<List<ApplicationEntity>> GetAll(Guid adminId)
         {
             string sql = $@"SELECT app.*, jwt.*, dn.* 
-                            FROM dbo.{typeof(ApplicationEntity).GetTableName()} app
-                            LEFT JOIN dbo.{typeof(JwtTenantConfigEntity).GetTableName()} jwt
+                            FROM {typeof(ApplicationEntity).GetTableName()} app
+                            LEFT JOIN {typeof(JwtTenantConfigEntity).GetTableName()} jwt
                                 ON app.{nameof(ApplicationEntity.Id)} = jwt.{nameof(JwtTenantConfigEntity.ApplicationId)}
-                            LEFT JOIN dbo.{typeof(DomainNameEntity).GetTableName()} dn
+                            LEFT JOIN {typeof(DomainNameEntity).GetTableName()} dn
                                 ON app.{nameof(ApplicationEntity.Id)} = dn.{nameof(DomainNameEntity.ApplicationId)}
                             WHERE {nameof(ApplicationUserEntity.AdminId)} = @AdminId";
 
@@ -146,7 +146,7 @@ namespace Authentication.Persistance.Repositories
             await Get(adminId, id);
 
             // TODO AUTO set LastModified
-            string sql = $@"UPDATE dbo.{typeof(ApplicationEntity).GetTableName()}
+            string sql = $@"UPDATE {typeof(ApplicationEntity).GetTableName()}
                             SET 
                                 {nameof(ApplicationEntity.Name)} = @Name,
                                 {nameof(ApplicationEntity.MultimediaUUID)} = @MultimediaUUID,
@@ -163,7 +163,7 @@ namespace Authentication.Persistance.Repositories
         {
             await Get(adminId, id);
 
-            string sql = $@"DELETE dbo.{typeof(ApplicationEntity).GetTableName()}
+            string sql = $@"DELETE {typeof(ApplicationEntity).GetTableName()}
                             WHERE {nameof(ApplicationUserEntity.Id)} = @Id";
 
             var parameters = new { Id = id };
@@ -174,7 +174,7 @@ namespace Authentication.Persistance.Repositories
         public async Task<Guid> GetApplicationIconUUID(Guid applicationId)
         {
             string sql = $@"SELECT {nameof(ApplicationEntity.MultimediaUUID)} 
-                            FROM dbo.{typeof(ApplicationEntity).GetTableName()} 
+                            FROM {typeof(ApplicationEntity).GetTableName()} 
                             WHERE {nameof(ApplicationUserEntity.Id)} = @Id";
 
             var parameters = new { Id = applicationId };

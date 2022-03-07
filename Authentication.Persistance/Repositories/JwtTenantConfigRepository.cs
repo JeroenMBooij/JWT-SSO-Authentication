@@ -34,7 +34,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<Guid> Insert(JwtTenantConfigEntity JwtTenantConfigEntity, string data = "")
         {
-            string sql = $@"INSERT INTO dbo.{typeof(JwtTenantConfigEntity).GetTableName()}
+            string sql = $@"INSERT INTO {typeof(JwtTenantConfigEntity).GetTableName()}
                             VALUES (@JwtTenantConfigId, @SecretKey, @Claims, @ExpireMinutes, @RefreshExpireMinutes, @Algorithm, @ApplicationId, @Created, @LastModified);";
 
             var parameters = new DynamicParameters();
@@ -59,7 +59,7 @@ namespace Authentication.Persistance.Repositories
 
         public async Task Update(Guid adminId, Guid id, JwtTenantConfigEntity jwtTenantConfigEntity)
         {
-            string sql = $@"UPDATE dbo.{typeof(JwtTenantConfigEntity).GetTableName()}
+            string sql = $@"UPDATE {typeof(JwtTenantConfigEntity).GetTableName()}
                             SET 
                                 {nameof(jwtTenantConfigEntity.SecretKey)} = @SecretKey,
                                 {nameof(jwtTenantConfigEntity.Claims)} = @Claims,

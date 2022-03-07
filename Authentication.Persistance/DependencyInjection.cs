@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 
 namespace Authentication.Persistance
@@ -17,7 +18,9 @@ namespace Authentication.Persistance
             #region Data Access
             var connectionString = GetDatabaseConnectionString(configuration);
             services.AddDbContext<MainIdentityContext>(options =>
-                         options.UseSqlServer(connectionString));
+            {
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            });
 
             services.AddSingleton<IMainSqlDataAccess, MainSqlDataAccess>();
 
@@ -33,6 +36,7 @@ namespace Authentication.Persistance
             #endregion
 
             #region Tenant Identity
+
             services.AddIdentity<ApplicationUserEntity, RoleEntity>();
             services.AddIdentityCore<ApplicationUserEntity>(options =>
             {
@@ -61,7 +65,7 @@ namespace Authentication.Persistance
             var dbUser = configuration["DB_USER"];
             var dbPassword = configuration["DB_PASSWORD"];
 
-            return $"Server={dbHost};Database={dbName};User Id={dbUser};Password={dbPassword};";
+            return $"server={dbHost}; database={dbName}; user={dbUser}; password={dbPassword}";
         }
     }
 

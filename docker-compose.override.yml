@@ -23,11 +23,11 @@ services:
 
   identitydb:
     container_name: identitydb
+    command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
-      - "3003:1433"
+      - "3003:3306"
     networks:
       - proxynet
     environment:
-      - SA_PASSWORD=${MSSQL_IDENTITY_PASSWORD}
-      - ACCEPT_EULA=Y
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}

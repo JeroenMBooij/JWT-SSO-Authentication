@@ -20,7 +20,7 @@ namespace Authentication.Persistance.Repositories
         public async Task<List<ApplicationUserEntity>> GetByAdmin(Guid adminId)
         {
             string sql = $@"SELECT * 
-                            FROM dbo.ApplicationUsers 
+                            FROM ApplicationUsers 
                             WHERE AdminId = @AdminId;";
 
             var parameters = new { AdminId = adminId };

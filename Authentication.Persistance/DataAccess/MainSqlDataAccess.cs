@@ -3,6 +3,7 @@ using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -58,7 +59,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
         public async Task<List<T>> GetAllData<T, U>(string sql, U parameters)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<T> data = await connection.QueryAsync<T>(sql, parameters);
 
@@ -76,7 +77,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
                 return data.ToList();
             }   
             
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<TReturn> data = await connection.QueryAsync(sql, mapper, parameters);
 
@@ -94,7 +95,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
                 return data.ToList();
             }
 
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<TReturn> data = await connection.QueryAsync(sql, mapper, parameters);
 
@@ -113,7 +114,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
                 return data.ToList();
             }
 
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<TReturn> data = await connection.QueryAsync(sql, mapper, parameters);
 
@@ -146,7 +147,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
         private async Task ExecuteStoredProceduresInternal<T>(Dictionary<T, string> ParametersToStoredProcedure)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
@@ -182,7 +183,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
         private async Task SaveDataInternal<U>(string sql, U parameters)
         {
-            using (IDbConnection connection = new SqlConnection(_connectionString))
+            using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
@@ -222,7 +223,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
 
         public void BeginTransaction()
         {
-            _connection = new SqlConnection(_connectionString);
+            _connection = new MySqlConnection(_connectionString);
             _connection.Open();
 
             _transaction = _connection.BeginTransaction();
