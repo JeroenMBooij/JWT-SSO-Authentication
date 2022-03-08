@@ -2,7 +2,7 @@ name: .net tests
 on:
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 jobs:
   runTests:
