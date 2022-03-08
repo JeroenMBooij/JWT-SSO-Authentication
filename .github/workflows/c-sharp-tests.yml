@@ -1,0 +1,29 @@
+name: .net tests
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+jobs:
+  runTests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output branch name
+        run: echo $GITHUB_REF
+    
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+    
+      - name: Restore NuGet packages
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+    
+      - name: Test
+        run: dotnet test -c Release --no-build
