@@ -3,9 +3,7 @@ version: '3.4'
 services:
   authenticationserver.web:
     image: ${DOCKER_REGISTRY-}authenticationserverweb
-    build:
-      context: .
-      dockerfile: AuthenticationServer.Web/Dockerfile
+    build: .
 
   identitydb:
     image: mysql
