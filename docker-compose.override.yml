@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   authenticationserver.web:
+    restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Development      
       NETWORK_ENVIRONMENT: Standalone      

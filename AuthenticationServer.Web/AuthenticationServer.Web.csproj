@@ -35,9 +35,5 @@
     <Folder Include="UploadedFiles\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="..\.dockerignore" />
-  </ItemGroup>
-
 
 </Project>

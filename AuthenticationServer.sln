@@ -24,9 +24,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationServer.UserPresentation", "AuthenticationServer.UserPresentation\AuthenticationServer.UserPresentation.csproj", "{9E84E9C8-3E19-46FE-8E6B-A994AB802240}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{F6871225-DA1D-4E91-9D7C-6B91D112911F}"
-	ProjectSection(SolutionItems) = preProject
-		Dockerfile = Dockerfile
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationServer.Services", "AuthenticationServer.Services\AuthenticationServer.Services.csproj", "{18644637-6D3F-467F-8976-6E9B80FB7735}"
 EndProject

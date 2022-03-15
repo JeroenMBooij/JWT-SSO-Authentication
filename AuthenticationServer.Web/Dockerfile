@@ -7,11 +7,11 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore "AuthenticationServer.Web/AuthenticationServer.Web.csproj"
-RUN dotnet build "AuthenticationServer.Web/AuthenticationServer.Web.csproj" -c Release -o /app/build
+RUN dotnet restore "AuthenticationServer.Web.csproj"
+RUN dotnet build "AuthenticationServer.Web.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "AuthenticationServer.Web/AuthenticationServer.Web.csproj" -c Release -o /app/publish
+RUN dotnet publish "AuthenticationServer.Web.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
