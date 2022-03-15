@@ -31,4 +31,4 @@ jobs:
           context: .
           file: AuthenticationServer.Web/Dockerfile
           push: true
-          tags: user/app:latest
+          tags: booij/authentication.service:latest
