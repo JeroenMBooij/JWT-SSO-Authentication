@@ -16,7 +16,7 @@ This repository contains the source code for an API where developers can manage 
 
 ```
 
-version: '3.4'
+version: '3.8'
 
 services:
 
@@ -26,7 +26,7 @@ services:
       DB_NAME: IdentityDb
       DB_USER: sa
       DB_PASSWORD: [your password]
-      JWT_SECRETTKEY: [your secret key]
+      JWT_SECRETTKEY: [your secret PKCS #8 key ]
       JWT_ISSUER: [You]
       EMAIL_APPKEY: [Your Google Email app key]
 
