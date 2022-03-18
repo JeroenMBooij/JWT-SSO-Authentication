@@ -170,22 +170,14 @@ namespace AuthenticationServer.Logic.Workers
 
         public SecurityKey GetAsymmetricSecurityKey(string secretKey)
         {
-            try 
-            { 
-                RSA rsa = RSA.Create();
-                rsa.ImportFromPem(secretKey.ToCharArray());
+            RSA rsa = RSA.Create();
+            rsa.ImportFromPem(secretKey.ToCharArray());
 
-                var keyparameters = rsa.ExportParameters(true);
+            var keyparameters = rsa.ExportParameters(true);
 
-                var key = new RsaSecurityKey(keyparameters);
+            var key = new RsaSecurityKey(keyparameters);
 
-                return key;
-            }
-            catch(Exception e)
-            {
-                _logger.LogError(e.ToString());
-                return null;
-            }
+            return key;
         }
 
         public SecurityKey GetSymmertricSecurityKey(string secretKey)

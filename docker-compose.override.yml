@@ -27,7 +27,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
-      - "3003:3306"
+      - "3006:3306"
     networks:
       - proxynet
     environment:
