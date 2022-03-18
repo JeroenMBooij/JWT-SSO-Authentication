@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -19,17 +20,27 @@ namespace AuthenticationServer.Web
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.SetMinimumLevel(LogLevel.Information);
+                builder.AddConsole();
+                builder.AddEventSourceLogger();
+            });
+            _logger = loggerFactory.CreateLogger<Startup>();
         }
 
         public IConfiguration Configuration { get; }
+        private readonly ILogger<Startup> _logger;
 
         public void ConfigureServices(IServiceCollection services)
         {
             #region endpoints
-            services.AddMyEndpoints();
+            services.AddLogging();
+            services.AddMyEndpoints(); 
             services.AddMySwagger(Configuration);
             #endregion
 
@@ -44,7 +55,7 @@ namespace AuthenticationServer.Web
             #endregion
 
             #region Authentication
-            var jwtManager = new JwtTokenWorker("startup", Configuration);
+            var jwtManager = new JwtTokenWorker("startup", Configuration, _logger);
             var jwtconfig = new JwtConfig()
             {
                 SecretKey = Configuration["JWT_SECRETKEY"],
