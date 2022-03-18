@@ -14,7 +14,7 @@ services:
       JWT_ISSUER: ${JWT_ISSUER}
       EMAIL_APPKEY: ${EMAIL_APPKEY}
     ports:
-      - "3000:80"   
+      - "3001:80"   
     volumes:
       - /home/server/files:/app/UploadedFiles
     networks:

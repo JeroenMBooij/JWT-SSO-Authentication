@@ -5,6 +5,7 @@ using AuthenticationServer.Common.Interfaces.Logic.Managers;
 using AuthenticationServer.Common.Models.ContractModels;
 using AuthenticationServer.Common.Models.DTOs;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;
@@ -20,10 +21,12 @@ namespace AuthenticationServer.Logic.Workers
     public class JwtTokenWorker : IJwtTokenWorker
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<JwtTokenWorker> _logger;
 
-        public JwtTokenWorker(IConfiguration config)
+        public JwtTokenWorker(IConfiguration config, ILogger<JwtTokenWorker> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         public JwtTokenWorker(string startup, IConfiguration config)
@@ -167,14 +170,22 @@ namespace AuthenticationServer.Logic.Workers
 
         public SecurityKey GetAsymmetricSecurityKey(string secretKey)
         {
-            RSA rsa = RSA.Create();
-            rsa.ImportFromPem(secretKey.ToCharArray());
+            try 
+            { 
+                RSA rsa = RSA.Create();
+                rsa.ImportFromPem(secretKey.ToCharArray());
 
-            var keyparameters = rsa.ExportParameters(true);
+                var keyparameters = rsa.ExportParameters(true);
 
-            var key = new RsaSecurityKey(keyparameters);
+                var key = new RsaSecurityKey(keyparameters);
 
-            return key;
+                return key;
+            }
+            catch(Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return null;
+            }
         }
 
         public SecurityKey GetSymmertricSecurityKey(string secretKey)
