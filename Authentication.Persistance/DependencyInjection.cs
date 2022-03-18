@@ -65,7 +65,7 @@ namespace Authentication.Persistance
             var dbUser = configuration["DB_USER"];
             var dbPassword = configuration["DB_PASSWORD"];
 
-            return $"server={dbHost};user={dbUser};password={dbPassword};database={dbName}";
+            return $"Server={dbHost}; Database={dbName}; Uid={dbUser}; Pwd={dbPassword}";
         }
     }
 
