@@ -64,7 +64,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             ApplicationDto applicationDto;
             if (string.IsNullOrEmpty(credentials.ApplicationId) == false)
             {
-                applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.Get(null, Guid.Parse(credentials.ApplicationId)));
+                applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.Get(Guid.Parse(credentials.AdminId), Guid.Parse(credentials.ApplicationId)));
                 if (applicationDto == null)
                     throw new AuthenticationApiException("Login", $"Invalid applicationId provided");
             }
