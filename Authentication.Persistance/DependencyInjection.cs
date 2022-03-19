@@ -19,7 +19,7 @@ namespace Authentication.Persistance
             var connectionString = GetDatabaseConnectionString(configuration);
             services.AddDbContext<MainIdentityContext>(options =>
             {
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), providerOptions => providerOptions.EnableRetryOnFailure());
             });
 
             services.AddSingleton<IMainSqlDataAccess, MainSqlDataAccess>();
