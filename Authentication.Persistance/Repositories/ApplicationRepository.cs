@@ -62,7 +62,7 @@ namespace Authentication.Persistance.Repositories
         public async Task<AccountRole?> GetAccountRole(Guid id)
         {
             string sql = $@"SELECT {nameof(ApplicationUserEntity.AuthenticationRole)} 
-                            FROM {typeof(ApplicationEntity).GetTableName()} 
+                            FROM {typeof(ApplicationUserEntity).GetTableName()} 
                             where {nameof(ApplicationUserEntity.Id)} = @Id";
 
             var parameters = new { Id = id.ToString() };

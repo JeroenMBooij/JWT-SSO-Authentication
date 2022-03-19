@@ -6,6 +6,7 @@ using AuthenticationServer.Common.Models.ContractModels;
 using AuthenticationServer.Common.Models.ContractModels.Account;
 using AuthenticationServer.Common.Models.ContractModels.Token;
 using AuthenticationServer.Common.Models.DTOs;
+using AuthenticationServer.Common.Models.DTOs.Account;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -112,12 +113,12 @@ namespace AuthenticationServer.Logic.Workers.Account
 
         public async Task<string> VerifyEmail(Guid code)
         {
-            AbstractAccountDto tenantDto;
+            TenantAccountDto tenantDto;
             try
             {
-                tenantDto = _mapper.Map<AbstractAccountDto>(await _accountRepository.Get(null, code));
+                tenantDto = _mapper.Map<TenantAccountDto>(await _accountRepository.Get(null, code));
             }
-            catch (Exception)
+            catch (Exception error)
             {
                 throw new Exception("Bad Request contact your system administrator.");
             }

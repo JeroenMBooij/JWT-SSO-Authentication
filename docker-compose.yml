@@ -10,7 +10,6 @@ services:
   identitydb:
     image: mysql
 
-
-networks:
-  proxynet:
-    name: custom_network
+  auth.email:
+    image: booij/email.service
+    

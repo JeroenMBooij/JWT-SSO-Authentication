@@ -4,8 +4,7 @@ services:
   authenticationserver.web:
     restart: always
     environment:
-      ASPNETCORE_ENVIRONMENT: Development      
-      NETWORK_ENVIRONMENT: Standalone      
+      ASPNETCORE_ENVIRONMENT: Development    
       DB_HOST: ${MSSQL_IDENTITY_HOST}
       DB_NAME: ${MSSQL_IDENTITY_NAME}
       DB_USER: ${MSSQL_IDENTITY_USER}
@@ -19,8 +18,6 @@ services:
       - "3001:80"   
     volumes:
       - /home/server/files:/app/UploadedFiles
-    networks:
-      - proxynet
     depends_on: 
       - identitydb
 
@@ -30,7 +27,13 @@ services:
     restart: always
     ports:
       - "3006:3306"
-    networks:
-      - proxynet
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    
+  auth.email:
+    restart: always
+    container_name: auth.email
+    ports:
+      - "2001:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging

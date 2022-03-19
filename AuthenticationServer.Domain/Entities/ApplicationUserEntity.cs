@@ -1,5 +1,4 @@
-﻿using AuthenticationServer.Domain.Common;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthenticationServer.Domain.Entities
 {
+    [Table("ApplicationUsers")]
     public class ApplicationUserEntity : IdentityUser<Guid>
     {
         public ApplicationUserEntity()
@@ -28,7 +28,7 @@ namespace AuthenticationServer.Domain.Entities
         public string RegisteredJWT { get; set; }
 
         [Column]
-        public DateTime? JwtIssuedAt  { get; set; }
+        public DateTime? JwtIssuedAt { get; set; }
 
         [Column]
         public string RegisteredRefreshToken { get; set; }
