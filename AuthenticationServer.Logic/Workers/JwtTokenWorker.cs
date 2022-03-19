@@ -171,6 +171,8 @@ namespace AuthenticationServer.Logic.Workers
 
         public SecurityKey GetAsymmetricSecurityKey(string secretKey)
         {
+            _logger.LogInformation($"secretKey: {secretKey}");
+            _logger.LogInformation($"RSA: {RSA.Create()}");
             RSA rsa = RSA.Create();
             rsa.ImportFromPem(secretKey.ToCharArray());
 
