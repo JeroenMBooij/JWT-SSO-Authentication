@@ -35,7 +35,7 @@ namespace AuthenticationServer.TenantPresentation
 
             #region Generated Http Clients
             services.AddHttpClient<IAuthenticationClient, AuthenticationClient>("Tenant-Authentication-Client", configuration =>
-                                            configuration.BaseAddress = new Uri(Configuration["BaseUrls:AuthenticationServer"]));
+                                            configuration.BaseAddress = new Uri(Configuration["AUTHENTICATION_URL"]));
             #endregion
 
             #region Localization

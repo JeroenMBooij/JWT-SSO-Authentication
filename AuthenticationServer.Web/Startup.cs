@@ -51,7 +51,7 @@ namespace AuthenticationServer.Web
             #endregion
 
             #region Generated Http Clients
-            services.AddHttpClient<IEmailClient, EmailClient>(configuration => configuration.BaseAddress = new Uri(Configuration["BaseUrls:EmailServer"]));
+            services.AddHttpClient<IEmailClient, EmailClient>(configuration => configuration.BaseAddress = new Uri(Configuration["EMAIL_URL"]));
             #endregion
 
             #region Authentication

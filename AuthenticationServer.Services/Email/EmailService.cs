@@ -22,7 +22,7 @@ namespace AuthenticationServer.Services.Email
         {
             string subject = "Recover Password";
             string verificationLink = $@"   <p> Enter your new password: </p>
-                                            <form action=""{_config["BaseUrls:AuthenticationServer"]}TenantAccount/recover-password"" method=""post""
+                                            <form action=""{_config["AUTHENTICATION_URL"]}TenantAccount/recover-password"" method=""post""
                                                 enctype=""application/x-www-form-urlencoded"">
                                                     <input type = ""text"" name=""NewPassword"">
                                                     <input type = ""hidden"" name=""ResetToken"" value=""{passwordRecoverToken}"">
@@ -50,7 +50,7 @@ namespace AuthenticationServer.Services.Email
         public async Task SendVerificationEmail(string recipient, Guid code)
         {
             string subject = "Verify Email";
-            string verificationLink = $@"<a href='{_config["BaseUrls:AuthenticationServer"]}/api​/Account​/{code}/VerifyEmail'> Verification Link </a>";
+            string verificationLink = $@"<a href='{_config["AUTHENTICATION_URL"]}/api​/Account​/{code}/VerifyEmail'> Verification Link </a>";
 
             var recipients = new List<string>() { recipient };
             var message = new Message()
