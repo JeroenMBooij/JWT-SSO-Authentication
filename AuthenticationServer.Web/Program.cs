@@ -23,10 +23,8 @@ namespace AuthenticationServer.Web
 
                 using var context = serviceProvider.GetRequiredService<MainIdentityContext>();
 
-                if (isDevelopment)
-                    await context.Database.EnsureCreatedAsync();
-                else
-                    await context.Database.MigrateAsync();
+                await context.Database.EnsureCreatedAsync();
+                await context.Database.MigrateAsync();
 
             }
             #endregion
