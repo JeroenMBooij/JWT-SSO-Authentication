@@ -110,7 +110,7 @@ namespace Authentication.Persistance.Repositories
                         return application;
                     });
 
-            if (application.AdminId != adminId)
+            if (application.AdminId != adminId.Value)
                 throw new AuthenticationApiException("Application", "UNAUTHORIZED", 403);
 
             return application;
