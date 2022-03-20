@@ -26,10 +26,11 @@ namespace Authentication.Persistance.Repositories
 
         public async Task<JwtTenantConfigEntity> GetFromApplicationId(Guid applicationId)
         {
-            string sql = $"SELECT * FROM JwtTenantConfig WHERE applicationId = {applicationId}";
+            string sql = $"SELECT * FROM JwtTenantConfig WHERE {nameof(JwtTenantConfigEntity.ApplicationId)} = @ApplicationId";
 
-            return await _db.GetData<JwtTenantConfigEntity, dynamic>(sql, new { });
+            return await _db.GetData<JwtTenantConfigEntity, object>(sql, new { ApplicationId = applicationId });
         }
+
 
 
         public async Task<Guid> Insert(JwtTenantConfigEntity JwtTenantConfigEntity, string data = "")
