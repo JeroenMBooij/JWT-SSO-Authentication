@@ -47,6 +47,9 @@ namespace AuthenticationServer.Logic.Workers
                 SigningCredentials = new SigningCredentials(GetSecurityKey(model.SecurityAlgorithm, model.SecretKey), model.SecurityAlgorithm.ToSchema())
             };
 
+            if (model.Claims.Any(s => s.Type == "iss"))
+                securityTokenDescriptor.Issuer = model.Claims.Where(s => s.Type == "iss").FirstOrDefault().Value;
+
             if (model.ExpireMinutes.HasValue)
                 securityTokenDescriptor.Expires = DateTime.Now.AddMinutes(model.ExpireMinutes.Value);
 
