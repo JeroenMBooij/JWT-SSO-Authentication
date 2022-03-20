@@ -8,6 +8,7 @@ namespace AuthenticationServer.Common.Models.ContractModels.Applications
 {
     public class Application
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public List<DomainName> Domains { get; set; }
         public string IconUUID { get; set; }

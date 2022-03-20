@@ -48,7 +48,7 @@ namespace AuthenticationServer.Logic.Workers.Account
         public async Task<string> RegisterAsync(AccountRegistration adminAccount)
         {
             AdminAccountDto adminAccountDto = _mapper.Map<AdminAccountDto>(adminAccount);
-
+            adminAccountDto.Id = Guid.Parse(adminAccount.AdminId);
 
             await CreateAccountAsync(adminAccountDto);
 
@@ -95,7 +95,8 @@ namespace AuthenticationServer.Logic.Workers.Account
 
         protected override void PopulateAccountPropertiesForNewAccountAsync(AbstractAccountDto adminDto)
         {
-            adminDto.Id = Guid.NewGuid();
+            if(adminDto.Id == Guid.Empty)
+                adminDto.Id = Guid.NewGuid();
             adminDto.LockoutEnabled = true;
         }
     }

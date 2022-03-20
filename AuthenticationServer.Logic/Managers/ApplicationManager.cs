@@ -70,7 +70,8 @@ namespace AuthenticationServer.Logic.Workers
 
         private void populateApplicationProperties(ApplicationDto applicationDto, string token)
         {
-            applicationDto.Id = Guid.NewGuid();
+            if(applicationDto.Id == Guid.Empty)
+                applicationDto.Id = Guid.NewGuid();
 
             var adminId = _jwtManager.GetUserId(token);
 

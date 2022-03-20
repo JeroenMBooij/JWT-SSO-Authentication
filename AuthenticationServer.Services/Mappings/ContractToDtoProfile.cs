@@ -64,10 +64,14 @@ namespace AuthenticationServer.Services.Mappings
 
 
             CreateMap<Application, ApplicationDto>()
+                .ForMember(destination => destination.Id,
+                                options => options.MapFrom(source => Guid.Parse(source.Id)))
                 .ForMember(destination => destination.IconUUID,
                                 options => options.MapFrom(source => Guid.Parse(source.IconUUID)))
                 .ForAllMembers(opt => opt.Condition((source, dest, sourceMember, destMember) => (sourceMember != null)));
             CreateMap<ApplicationDto, Application>()
+                .ForMember(destination => destination.Id,
+                                options => options.MapFrom(source => source.Id.ToString()))
                 .ForMember(destination => destination.IconUUID,
                                 options => options.MapFrom(source => source.IconUUID.ToString()));
 
