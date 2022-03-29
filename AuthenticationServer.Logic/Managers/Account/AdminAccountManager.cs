@@ -48,7 +48,8 @@ namespace AuthenticationServer.Logic.Workers.Account
         public async Task<string> RegisterAsync(AccountRegistration adminAccount)
         {
             AdminAccountDto adminAccountDto = _mapper.Map<AdminAccountDto>(adminAccount);
-            adminAccountDto.Id = Guid.Parse(adminAccount.AdminId);
+            if (adminAccount.AdminId is not null)
+                adminAccountDto.Id = Guid.Parse(adminAccount.AdminId);
 
             await CreateAccountAsync(adminAccountDto);
 

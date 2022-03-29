@@ -10,6 +10,7 @@ using AuthenticationServer.Web.Middleware.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Web.Controllers
@@ -48,7 +49,10 @@ namespace AuthenticationServer.Web.Controllers
 
             string hostname = Request.GetDomainUrl();
 
-            return await _accountService.LoginAsync(credentials, hostname);
+			Ticket ticket = await _accountService.LoginAsync(credentials, hostname);
+			Response.Cookies.Append("authorization", JsonSerializer.Serialize(ticket));
+
+			return ticket;
         }
 
 
