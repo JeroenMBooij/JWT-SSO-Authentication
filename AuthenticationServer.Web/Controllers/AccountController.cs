@@ -50,7 +50,13 @@ namespace AuthenticationServer.Web.Controllers
             string hostname = Request.GetDomainUrl();
 
 			Ticket ticket = await _accountService.LoginAsync(credentials, hostname);
-			Response.Cookies.Append("authorization", JsonSerializer.Serialize(ticket));
+			Response.Cookies.Append(
+				"authorization", 
+				JsonSerializer.Serialize(ticket),
+				new CookieOptions()
+				{
+					Path = "/"
+				});
 
 			return ticket;
         }

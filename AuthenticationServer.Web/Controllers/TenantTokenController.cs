@@ -1,9 +1,11 @@
 ﻿using AuthenticationServer.Common.Constants.Token;
 using AuthenticationServer.Common.Interfaces.Services;
 using AuthenticationServer.Common.Models.ContractModels.Token;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AuthenticationServer.Web.Controllers
@@ -73,7 +75,16 @@ namespace AuthenticationServer.Web.Controllers
         [HttpPost("refresh")]
         public async Task<Ticket> RefreshToken([FromBody] Ticket ticket)
         {
-            return await _tokenProcessService.RefreshToken(ticket);
+            Ticket refreshTicket = await _tokenProcessService.RefreshToken(ticket);
+            Response.Cookies.Append(
+                "authorization",
+                JsonSerializer.Serialize(refreshTicket),
+                new CookieOptions()
+                {
+                    Path = "/"
+                });
+
+            return refreshTicket;
         }
     }
 }
