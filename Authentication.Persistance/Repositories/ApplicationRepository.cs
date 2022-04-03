@@ -104,17 +104,11 @@ namespace Authentication.Persistance.Repositories
 
             var parameters = new { Id = id };
 
-
-            _logger.LogInformation(adminId.Value.ToString());
-            _logger.LogInformation(JsonSerializer.Serialize(_db));
-
-            if (_db is null)
-                _logger.LogInformation("WHAT THE FUCK WHY");
-
             var application = await _db.GetData<ApplicationEntity,
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,
                     (application, jwtConfigs, domains) =>
                     {
+                        _logger.LogInformation("data collected");
                         _logger.LogInformation(JsonSerializer.Serialize(application));
                         application.JwtTenantConfigurations.Add(jwtConfigs);
                         _logger.LogInformation("nope");
@@ -140,9 +134,6 @@ namespace Authentication.Persistance.Repositories
                             WHERE {nameof(ApplicationUserEntity.AdminId)} = @AdminId";
 
             var parameters = new { AdminId = adminId };
-
-
-            _logger.LogInformation(JsonSerializer.Serialize(_db));
 
             var applications = await _db.GetAllData<ApplicationEntity,
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,

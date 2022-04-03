@@ -63,7 +63,7 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             {
                 IEnumerable<T> data = await connection.QueryAsync<T>(sql, parameters);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<T>();
             }
         }
 
@@ -74,14 +74,14 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             {
                 IEnumerable<TReturn> data = await _connection.QueryAsync(sql, mapper, parameters, _transaction);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<TReturn>();
             }   
             
             using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<TReturn> data = await connection.QueryAsync(sql, mapper, parameters);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<TReturn>();
             }
         }
 
@@ -92,14 +92,14 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             {
                 IEnumerable<TReturn> data = await _connection.QueryAsync(sql, mapper, parameters, _transaction);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<TReturn>();
             }
 
             using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<TReturn> data = await connection.QueryAsync(sql, mapper, parameters);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<TReturn>();
             }
         }
 
@@ -111,14 +111,14 @@ namespace AuthenticationServer.Domain.DataAccess.DataContext
             {
                 IEnumerable<TReturn> data = await _connection.QueryAsync(sql, mapper, parameters, _transaction);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<TReturn>();
             }
 
             using (IDbConnection connection = new MySqlConnection(_connectionString))
             {
                 IEnumerable<TReturn> data = await connection.QueryAsync(sql, mapper, parameters);
 
-                return data.ToList();
+                return data?.ToList() ?? new List<TReturn>();
             }
         }
 
