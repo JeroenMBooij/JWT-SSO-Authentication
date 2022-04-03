@@ -49,14 +49,14 @@ namespace AuthenticationServer.Web.Middleware.Filters
                         FieldName = "Internal Server Error",
                         Message = message
                     });
-                    
+
                 }
                 else
                 {
                     context.HttpContext.Response.StatusCode = 500;
                     string message = "OMFG, what did you do to me!?";
-                    if (_environment.IsDevelopment())
-                        message = context.Exception.Message;
+                    if (_environment.IsProduction() == false)
+                        message = context.Exception.ToString();
 
                     errorResponse.Errors.Add(new ErrorModel()
                     {
