@@ -8,6 +8,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Authentication.Persistance.Repositories
@@ -110,7 +111,9 @@ namespace Authentication.Persistance.Repositories
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,
                     (application, jwtConfigs, domains) =>
                     {
+                        _logger.LogInformation(JsonSerializer.Serialize(application));
                         application.JwtTenantConfigurations.Add(jwtConfigs);
+                        _logger.LogInformation("nope");
                         application.Domains.Add(domains);
 
                         return application;
