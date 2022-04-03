@@ -46,7 +46,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             JwtTenantConfigDto jwtTenantConfigDto = _mapper.Map<JwtTenantConfigDto>(await _repository.JwtTenantConfig.GetFromApplicationId(Guid.Parse(ticket.ApplicationId)));
 
             DateTime refreshExpireDate = DateTime.Parse(registeredTicket.JwtIssuedAt).AddMinutes(jwtTenantConfigDto.RefreshExpireMinutes.Value);
-            if (refreshExpireDate > DateTime.UtcNow)
+            if (refreshExpireDate < DateTime.UtcNow)
                 throw new AuthenticationApiException("refresh", "expired", 410);
 
             if (registeredTicket.RegisteredRefreshToken.Equals(ticket.RegisteredRefreshToken) &&

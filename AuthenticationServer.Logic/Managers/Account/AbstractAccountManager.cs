@@ -62,6 +62,7 @@ namespace AuthenticationServer.Logic.Workers.Account
         {
             Ticket ticket = new Ticket();
             ticket.RegisteredJWT = _jwtManager.GenerateToken(jwtModelDto);
+            ticket.JwtIssuedAt = DateTime.UtcNow.ToString();
 
             if (jwtModelDto.RefreshExpireMinutes is not null)
             {
@@ -72,7 +73,10 @@ namespace AuthenticationServer.Logic.Workers.Account
 
             // TODO refactor
             if (applicationId is not null)
+            {
+                ticket.ApplicationId = applicationId.Value.ToString();
                 await _accountRepository.RegisterJWT(accountId, applicationId, ticket.RegisteredJWT);
+            }
 
             return ticket;
         }
