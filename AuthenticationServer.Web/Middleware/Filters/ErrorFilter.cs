@@ -41,7 +41,7 @@ namespace AuthenticationServer.Web.Middleware.Filters
                 {
                     context.HttpContext.Response.StatusCode = 500;
                     string message = "Something went terrible wrong!";
-                    if (_environment.IsDevelopment())
+                    if (_environment.IsProduction() == false)
                         message = context.Exception.Message;
 
                     errorResponse.Errors.Add(new ErrorModel()
