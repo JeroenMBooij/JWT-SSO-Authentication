@@ -106,6 +106,10 @@ namespace Authentication.Persistance.Repositories
 
 
             _logger.LogInformation(adminId.Value.ToString());
+            _logger.LogInformation(JsonSerializer.Serialize(_db));
+
+            if (_db is null)
+                _logger.LogInformation("WHAT THE FUCK WHY");
 
             var application = await _db.GetData<ApplicationEntity,
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,
