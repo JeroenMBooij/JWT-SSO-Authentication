@@ -5,6 +5,7 @@ using AuthenticationServer.Common.Interfaces.Domain.DataAccess;
 using AuthenticationServer.Common.Interfaces.Domain.Repositories;
 using AuthenticationServer.Domain.Entities;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,10 +15,12 @@ namespace Authentication.Persistance.Repositories
     public class ApplicationRepository : IApplicationRepository
     {
         private IMainSqlDataAccess _db;
+        private readonly ILogger<ApplicationRepository> _logger;
 
-        public ApplicationRepository(IMainSqlDataAccess db)
+        public ApplicationRepository(IMainSqlDataAccess db, ILogger<ApplicationRepository> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         public async Task<ApplicationEntity> GetApplicationFromName(string name)
@@ -99,6 +102,9 @@ namespace Authentication.Persistance.Repositories
                             WHERE app.{nameof(ApplicationEntity.Id)} = @Id;";
 
             var parameters = new { Id = id };
+
+
+            _logger.LogInformation(adminId.Value.ToString());
 
             var application = await _db.GetData<ApplicationEntity,
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,
