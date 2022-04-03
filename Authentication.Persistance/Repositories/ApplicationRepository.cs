@@ -141,6 +141,9 @@ namespace Authentication.Persistance.Repositories
 
             var parameters = new { AdminId = adminId };
 
+
+            _logger.LogInformation(JsonSerializer.Serialize(_db));
+
             var applications = await _db.GetAllData<ApplicationEntity,
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,
                     (application, jwtConfigs, domains) =>
