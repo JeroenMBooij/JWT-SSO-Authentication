@@ -108,10 +108,7 @@ namespace Authentication.Persistance.Repositories
                 JwtTenantConfigEntity, DomainNameEntity, ApplicationEntity, dynamic>(sql, parameters,
                     (application, jwtConfigs, domains) =>
                     {
-                        _logger.LogInformation("data collected");
-                        _logger.LogInformation(JsonSerializer.Serialize(application));
                         application.JwtTenantConfigurations.Add(jwtConfigs);
-                        _logger.LogInformation("nope");
                         application.Domains.Add(domains);
 
                         return application;

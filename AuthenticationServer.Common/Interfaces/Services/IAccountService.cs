@@ -11,7 +11,7 @@ namespace AuthenticationServer.Common.Interfaces.Services
     {
         Task<Ticket> LoginAsync(Credentials credentials, Guid applicationId);
         Task<Ticket> LoginAsync(Credentials credentials, string hostname = "");
-        Task<string> RegisterAsync(AccountRegistration applicationAccount);
+        Task<AccountConfirmation> RegisterAsync(AccountRegistration applicationAccount);
         Task<AbstractAccountDto> Get(Guid id);
         Task<string> VerifyEmail(Guid code);
         Task ChangePassword(NewCredentials newCredentials);

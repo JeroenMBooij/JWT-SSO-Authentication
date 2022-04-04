@@ -91,7 +91,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             return ticket;
         }
 
-        public async Task<string> RegisterAsync(AccountRegistration tenant)
+        public async Task<AccountConfirmation> RegisterAsync(AccountRegistration tenant)
         {
             if (tenant.AdminId is null)
                 throw new AuthenticationApiException("AccountData", "AdminId is required for Tenant Accounts");
@@ -110,7 +110,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             return await RegisterTenantAsync(tenantDto);
         }
 
-        public async Task<string> RegisterWithHostnameAsync(AccountData tenant, string hostname)
+        public async Task<AccountConfirmation> RegisterWithHostnameAsync(AccountData tenant, string hostname)
         {
             ApplicationDto applicationDto = _mapper.Map<ApplicationDto>(await _applicationRepo.GetApplicationFromHostname(hostname));
 
@@ -122,7 +122,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             return await RegisterTenantAsync(tenantAccount);
         }
 
-        public async Task<string> RegisterWithTokenAsync(AccountData tenant, string adminToken)
+        public async Task<AccountConfirmation> RegisterWithTokenAsync(AccountData tenant, string adminToken)
         {
             Guid adminId = _jwtManager.GetUserId(adminToken);
 
@@ -133,19 +133,27 @@ namespace AuthenticationServer.Logic.Workers.Account
             return await RegisterTenantAsync(tenantAccount);
         }
 
-        private async Task<string> RegisterTenantAsync(TenantAccountDto AccountDto)
+        private async Task<AccountConfirmation> RegisterTenantAsync(TenantAccountDto accountDto)
         {
-            AccountDto = await CreateAccountAsync(AccountDto);
+            accountDto = await CreateAccountAsync(accountDto);
 
             if (_config["NETWORK_ENVIRONMENT"] != "Standalone")
             {
-                await _emailManager.SendVerificationEmail(AccountDto.Email, AccountDto.Id);
-                return $"An Email has been send to {AccountDto.Email}. Please confirm your Email to complete your registration.";
+                await _emailManager.SendVerificationEmail(accountDto.Email, accountDto.Id);
+                return new AccountConfirmation()
+                {
+                    Id = accountDto.Id.ToString(),
+                    Message = $"An Email has been send to {accountDto.Email}. Please confirm your Email to complete your registration."
+                };
             }
             else
             {
-                await _tenantRepo.SetVerified(AccountDto.Id);
-                return $"Email verified you can now login. Deploy email service to send emails https://github.com/JeroenMBooij/EmailService and remove the NETWORK_ENVIRONMENT variable from docker-compose";
+                await _tenantRepo.SetVerified(accountDto.Id);
+                return new AccountConfirmation()
+                {
+                    Id = accountDto.Id.ToString(),
+                    Message = $"Email verified you can now login. Deploy email service to send emails https://github.com/JeroenMBooij/EmailService and remove the NETWORK_ENVIRONMENT variable from docker-compose"
+                };
             }
 
 

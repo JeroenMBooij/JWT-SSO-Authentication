@@ -45,7 +45,7 @@ namespace AuthenticationServer.Logic.Workers.Account
             return await LoginAsync(credentials);
         }
 
-        public async Task<string> RegisterAsync(AccountRegistration adminAccount)
+        public async Task<AccountConfirmation> RegisterAsync(AccountRegistration adminAccount)
         {
             AdminAccountDto adminAccountDto = _mapper.Map<AdminAccountDto>(adminAccount);
             if (adminAccount.AdminId is not null)
@@ -56,12 +56,20 @@ namespace AuthenticationServer.Logic.Workers.Account
             if (_config["NETWORK_ENVIRONMENT"] != "Standalone")
             {
                 await _emailManager.SendVerificationEmail(adminAccountDto.Email, adminAccountDto.Id);
-                return $"An Email has been send to {adminAccountDto.Email}. Please confirm your Email to complete your registration.";
+                return new AccountConfirmation()
+                {
+                    Id = adminAccountDto.Id.ToString(),
+                    Message = $"An Email has been send to {adminAccountDto.Email}. Please confirm your Email to complete your registration."
+                };
             }
             else
             {
                 await _accountRepository.SetVerified(adminAccountDto.Id);
-                return $"Email verified you can now login. Deploy email service to send emails https://github.com/JeroenMBooij/EmailService and remove the NETWORK_ENVIRONMENT variable from docker-compose";
+                return new AccountConfirmation()
+                {
+                    Id = adminAccountDto.Id.ToString(),
+                    Message = $"Email verified you can now login. Deploy email service to send emails https://github.com/JeroenMBooij/EmailService and remove the NETWORK_ENVIRONMENT variable from docker-compose"
+                };
             }
         }
 

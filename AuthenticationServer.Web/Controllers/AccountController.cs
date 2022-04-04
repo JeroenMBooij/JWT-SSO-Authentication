@@ -76,7 +76,7 @@ namespace AuthenticationServer.Web.Controllers
         /// <returns>Registration message</returns>
         [HttpPost("Register")]
         [SuccessStatusCode(StatusCodes.Status201Created)]
-        public async Task<string> Register([FromBody] AccountRegistration accountData)
+        public async Task<AccountConfirmation> Register([FromBody] AccountRegistration accountData)
         {
             _accountService = _accountServiceFactory.CreateAccountService(Enum.Parse<AccountRole>(accountData.AuthenticationRole));
 
