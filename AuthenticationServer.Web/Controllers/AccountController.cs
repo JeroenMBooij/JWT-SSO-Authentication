@@ -76,11 +76,11 @@ namespace AuthenticationServer.Web.Controllers
         /// <returns>Registration message</returns>
         [HttpPost("Register")]
         [SuccessStatusCode(StatusCodes.Status201Created)]
-        public async Task<AccountConfirmation> Register([FromBody] AccountRegistration accountData)
+        public async Task<ActionResult<AccountConfirmation>> Register([FromBody] AccountRegistration accountData)
         {
             _accountService = _accountServiceFactory.CreateAccountService(Enum.Parse<AccountRole>(accountData.AuthenticationRole));
 
-            return await _accountService.RegisterAsync(accountData);
+            return Created("api/[controller]/login", await _accountService.RegisterAsync(accountData));
         }
 
 
