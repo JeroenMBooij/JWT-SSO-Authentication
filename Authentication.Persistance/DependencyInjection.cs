@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Polly;
 using System;
 
 namespace Authentication.Persistance
@@ -17,9 +17,18 @@ namespace Authentication.Persistance
         {
             #region Data Access
             var connectionString = GetDatabaseConnectionString(configuration);
-            services.AddDbContext<MainIdentityContext>(options =>
+            var retry = Policy.Handle<Exception>()
+                          .WaitAndRetry(
+                              retryCount: 10,
+                              // 2,4,8,16,32 etc.
+                              sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+            retry.Execute(() =>
             {
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), providerOptions => providerOptions.EnableRetryOnFailure(30, TimeSpan.FromSeconds(30), null));
+                services.AddDbContext<DbContext>(options =>
+                {
+                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                });
             });
 
             services.AddSingleton<IMainSqlDataAccess, MainSqlDataAccess>();
@@ -52,7 +61,7 @@ namespace Authentication.Persistance
                  .AddEntityFrameworkStores<MainIdentityContext>()
                  .AddDefaultTokenProviders();
 
-     
+
             #endregion
 
 
