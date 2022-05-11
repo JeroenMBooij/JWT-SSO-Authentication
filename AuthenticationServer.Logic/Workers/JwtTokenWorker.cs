@@ -175,7 +175,10 @@ namespace AuthenticationServer.Logic.Workers
         public SecurityKey GetAsymmetricSecurityKey(string secretKey)
         {
             if (_config["ASPNETCORE_ENVIRONMENT"] != "Production")
+            {
+                _logger.LogInformation("************SECRET****************");
                 _logger.LogInformation(secretKey);
+            }
 
             RSA rsa = RSA.Create();
             rsa.ImportFromPem(secretKey.ToCharArray());
